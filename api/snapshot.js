@@ -6,7 +6,7 @@ const { digestFetch } = require('./_lib/nvrDigest');
 // Equivalente a _reducir_liviano() del app.py original: reduce a un ancho
 // fijo y re-codifica en JPEG calidad 70, sin importar el peso original del
 // substream del NVR. Si falla, se devuelve el original (igual que el try/except de Python).
-async function reducirLiviano(buffer, anchoMax = 640, calidad = 70) {
+async function reducirLiviano(buffer, anchoMax = 480, calidad = 60) {
   try {
     const metadata = await sharp(buffer).metadata();
     let pipeline = sharp(buffer).jpeg({ quality: calidad });

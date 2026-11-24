@@ -860,7 +860,7 @@
             statusDiv.innerText = "Abriendo portón...";
             statusDiv.style.color = "#3498db";
 
-            seleccionarCamara(canalActivo);
+            setTimeout(() => seleccionarCamara(canalActivo), 3000);
 
             try {
                 const res = await fetch('/api/alarm', {
