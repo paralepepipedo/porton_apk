@@ -1,6 +1,23 @@
+const sharp = require('sharp');
 const { getUsuarioPorToken } = require('./_lib/auth');
 const { supabase } = require('./_lib/supabase');
 const { digestFetch } = require('./_lib/nvrDigest');
+
+// Equivalente a _reducir_liviano() del app.py original: reduce a un ancho
+// fijo y re-codifica en JPEG calidad 70, sin importar el peso original del
+// substream del NVR. Si falla, se devuelve el original (igual que el try/except de Python).
+async function reducirLiviano(buffer, anchoMax = 640, calidad = 70) {
+  try {
+    const metadata = await sharp(buffer).metadata();
+    let pipeline = sharp(buffer).jpeg({ quality: calidad });
+    if (metadata.width && metadata.width > anchoMax) {
+      pipeline = pipeline.resize({ width: anchoMax });
+    }
+    return await pipeline.toBuffer();
+  } catch (e) {
+    return buffer;
+  }
+}
 
 // Pide UNA sola foto al NVR (sin capturador en segundo plano, sin loop).
 // Si el usuario quiere otra, el navegador vuelve a llamar a este mismo endpoint.
@@ -38,10 +55,11 @@ module.exports = async function handler(req, res) {
     if (!nvrRes.ok) {
       return res.status(502).json({ success: false, message: 'El NVR no respondio correctamente' });
     }
-    const buffer = Buffer.from(await nvrRes.arrayBuffer());
+    const original = Buffer.from(await nvrRes.arrayBuffer());
+    const reducido = await reducirLiviano(original);
     res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).send(buffer);
+    return res.status(200).send(reducido);
   } catch (e) {
     return res.status(502).json({ success: false, message: 'No se pudo contactar al NVR' });
   }

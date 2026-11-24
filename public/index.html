@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#0a0e13">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Control Portón">
+    <meta name="apple-mobile-web-app-title" content="AltoCasares1">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icon-192.png">
     <title>Control Portón Dahua</title>
@@ -19,7 +19,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
-            background-color: #1a1a1a;
+            background-color: #0a0e13;
+            background-image: radial-gradient(ellipse 900px 500px at 50% -10%, rgba(55, 201, 224, 0.08), transparent 60%);
             color: #fff;
             text-align: center;
             padding: 10px;
@@ -41,17 +42,13 @@
         }
 
         .login-box {
-            background: #2a2a2a;
+            background: #12181f;
+            border: 1px solid #232c37;
             padding: 40px 30px;
             border-radius: 16px;
             width: 100%;
             max-width: 380px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-        }
-
-        .login-box h1 {
-            margin: 0 0 8px 0;
-            font-size: 2rem;
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.65);
         }
 
         .login-box p {
@@ -77,8 +74,8 @@
         .form-group input {
             width: 100%;
             padding: 12px 16px;
-            background: #1a1a1a;
-            border: 1px solid #444;
+            background: #0a0e13;
+            border: 1px solid #232c37;
             border-radius: 8px;
             color: #fff;
             font-size: 16px;
@@ -87,7 +84,7 @@
         }
 
         .form-group input:focus {
-            border-color: #2ecc71;
+            border-color: #37c9e0;
         }
 
         .remember-row {
@@ -101,7 +98,7 @@
         .remember-row input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: #2ecc71;
+            accent-color: #2fd47a;
         }
 
         .remember-row label {
@@ -113,18 +110,22 @@
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: #2ecc71;
-            color: #fff;
+            color: #06110a;
+            background: radial-gradient(circle at 38% 30%, #45e592, #2fd47a 45%, #1a8f52 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.18),
+                0 10px 24px -8px rgba(47, 212, 122, 0.4);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 800;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: transform 0.08s ease, filter 0.15s ease;
         }
 
         .btn-login:hover {
-            background: #27ae60;
+            filter: brightness(1.05);
         }
 
         .btn-login:active {
@@ -132,7 +133,9 @@
         }
 
         .btn-login:disabled {
-            background: #555;
+            background: #3a4550;
+            color: #8695a3;
+            box-shadow: none;
             cursor: not-allowed;
         }
 
@@ -158,12 +161,13 @@
         }
 
         .blocked-box {
-            background: #2a2a2a;
+            background: #12181f;
+            border: 1px solid #232c37;
             padding: 40px 30px;
             border-radius: 16px;
             max-width: 420px;
             width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.65);
         }
 
         .blocked-icon {
@@ -213,12 +217,24 @@
             font-size: clamp(1.5rem, 5vw, 2rem);
         }
 
+        .brandname {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            font-size: clamp(1.3rem, 5vw, 1.6rem);
+            margin: 4px 0 2px;
+        }
+
+        .brandname .num {
+            color: #37c9e0;
+        }
+
         .container {
             max-width: 720px;
             margin: 0 auto;
-            background: #2a2a2a;
+            background: #12181f;
             padding: 15px;
             border-radius: 10px;
+            border: 1px solid #232c37;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
@@ -261,19 +277,21 @@
         }
 
         .admin-link {
-            color: #2ecc71;
+            color: #37c9e0;
             font-weight: bold;
             text-decoration: none;
         }
 
         .video-container {
-            background: #000;
-            border-radius: 8px;
+            background: #060a0e;
+            border: 1px solid #232c37;
+            border-radius: 12px;
             margin: 15px auto;
-            max-width: 100%;
+            max-width: 720px;
             aspect-ratio: 16 / 9;
             overflow: hidden;
             position: relative;
+            box-shadow: 0 16px 32px -14px rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -290,70 +308,29 @@
         }
 
         .video-placeholder {
-            color: #555;
-            font-size: 14px;
-        }
-
-        .channel-selector {
-            margin: 12px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .channel-selector select {
-            padding: 10px 16px;
-            font-size: 15px;
-            border-radius: 5px;
-            background: #3a3a3a;
-            color: #fff;
-            border: 1px solid #555;
-            min-width: 150px;
-        }
-
-        .btn-foto {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            background: #3498db;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .btn-foto:hover {
-            background: #2980b9;
-        }
-
-        .btn-foto:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+            color: #3a4550;
+            font-size: 13px;
+            padding: 0 20px;
         }
 
         .controls {
             margin-top: 15px;
             display: flex;
+            gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 15px 30px;
-            font-size: clamp(14px, 4vw, 18px);
-            font-weight: bold;
             border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 240px;
+            transition: transform 0.08s ease, filter 0.08s ease;
             touch-action: manipulation;
         }
 
         .btn:active {
-            transform: scale(0.95);
-            filter: brightness(0.9);
+            transform: scale(0.96);
+            filter: brightness(0.96);
         }
 
         .btn:disabled {
@@ -361,14 +338,55 @@
             cursor: not-allowed;
         }
 
+        #btnPorton {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            margin: 4px auto 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #btnPorton svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        #btnPorton span {
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
         .btn-open {
-            background-color: #2ecc71;
-            color: white;
+            color: #06110a;
+            background: radial-gradient(circle at 38% 30%, #45e592, #2fd47a 45%, #1a8f52 100%);
+            box-shadow:
+                0 0 0 6px rgba(47, 212, 122, 0.12),
+                0 16px 32px -10px rgba(47, 212, 122, 0.45),
+                inset 0 3px 6px rgba(255, 255, 255, 0.35),
+                inset 0 -6px 12px rgba(0, 0, 0, 0.2);
         }
 
         .btn-closing {
-            background-color: #e74c3c;
-            color: white;
+            color: #fff;
+            background: radial-gradient(circle at 38% 30%, #f4726d, #ef4a45 45%, #a9312e 100%);
+            box-shadow:
+                0 0 0 6px rgba(239, 74, 69, 0.12),
+                0 16px 32px -10px rgba(239, 74, 69, 0.45),
+                inset 0 3px 6px rgba(255, 255, 255, 0.25),
+                inset 0 -6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-closing svg .arc-1 {
+            opacity: 0.4;
+        }
+
+        .btn-closing svg .arc-2 {
+            opacity: 0.7;
         }
 
         @keyframes parpadeo {
@@ -398,6 +416,82 @@
             display: none;
         }
 
+        /* ─── GRILLA DE CÁMARAS ─── */
+        #camarasStatus {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            max-width: 420px;
+            margin: 14px auto 0;
+            font-size: 12.5px;
+        }
+
+        .cam-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 12px;
+            background: #131a21;
+            border: 1px solid #232c37;
+            border-radius: 10px;
+            color: #8695a3;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: border-color .15s, background .15s, color .15s;
+        }
+
+        .cam-item:hover {
+            background: #182029;
+            border-color: #2c3742;
+            color: #e9eef3;
+        }
+
+        .cam-label {
+            flex: 1;
+            text-align: left;
+            line-height: 1.25;
+        }
+
+        .cam-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #3a4550;
+        }
+
+        .cam-dot.cargando {
+            background: #8695a3;
+            animation: dot-checking 1s ease-in-out infinite;
+        }
+
+        @keyframes dot-checking {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .cam-item.active-cam {
+            color: #e9eef3;
+            border-color: #1d6b78;
+            background: linear-gradient(180deg, rgba(55, 201, 224, 0.12), rgba(55, 201, 224, 0.04));
+        }
+
+        .cam-item.active-cam .cam-dot {
+            background: #37c9e0;
+            box-shadow: 0 0 6px 1px rgba(55, 201, 224, 0.55);
+        }
+
+        .cam-item.active-cam .cam-label {
+            font-weight: 700;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 5px;
@@ -410,6 +504,16 @@
             h1 {
                 margin: 5px 0;
             }
+
+            #btnPorton {
+                width: 148px !important;
+                height: 148px !important;
+            }
+
+            #btnPorton svg {
+                width: 42px !important;
+                height: 42px !important;
+            }
         }
 
         /* ─── BOTÓN INSTALAR PWA ─── */
@@ -418,8 +522,8 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #2ecc71;
-            color: #111;
+            background-color: #2fd47a;
+            color: #06110a;
             border: none;
             border-radius: 50px;
             padding: 12px 18px;
@@ -443,8 +547,7 @@
     <!-- ─── PANTALLA DE LOGIN ─── -->
     <div id="loginScreen">
         <div class="login-box">
-            <h1>🚪</h1>
-            <h1 style="font-size:1.5rem; margin-bottom:4px;">Control de Portón</h1>
+            <h1 class="brandname" style="margin-bottom:4px;">AltoCasares<span class="num">1</span></h1>
             <p>Ingresa tus credenciales para continuar</p>
 
             <div class="form-group">
@@ -479,7 +582,7 @@
         </div>
     </div>
 
-    <!-- ─── PANTALLA PRINCIPAL (ya no video: eso vive en la app Android) ─── -->
+    <!-- ─── PANTALLA PRINCIPAL ─── -->
     <div id="mainScreen">
         <div class="container">
             <div class="user-bar">
@@ -487,7 +590,8 @@
                 <button onclick="cerrarSesion()">Cerrar sesión</button>
             </div>
 
-            <h1>🚪 Control de Portón</h1>
+            <h1 class="brandname">AltoCasares<span class="num">1</span></h1>
+            <p class="info">Modo Optimizado - Bajo Consumo</p>
 
             <div id="avisoBox"
                 style="display:none;background:#e67e22;color:#fff;font-weight:700;font-size:16px;padding:12px 16px;border-radius:8px;margin:10px 0;text-align:center;letter-spacing:0.3px;">
@@ -495,28 +599,46 @@
 
             <div class="video-container">
                 <img id="videoStream" alt="Cámara">
-                <div id="videoPlaceholder" class="video-placeholder">Elige una cámara y pide una foto</div>
-            </div>
-
-            <div class="channel-selector">
-                <label for="channel">📹 Cámara: </label>
-                <select id="channel">
-                    <option value="1">Puerta Peatonal</option>
-                    <option value="2" selected>Portón Exterior</option>
-                    <option value="3">Portón Interior</option>
-                    <option value="4">Calle principal</option>
-                </select>
-                <button class="btn-foto" id="btnFoto" onclick="pedirFoto()">📷 Ver cámara</button>
+                <div id="videoPlaceholder" class="video-placeholder">Tocá una cámara para pedir una foto</div>
             </div>
 
             <div class="controls">
-                <button id="btnPorton" class="btn btn-open" onclick="abrirPorton()">🚪 ABRIR PORTÓN</button>
+                <button id="btnPorton" class="btn btn-open" onclick="abrirPorton()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path class="arc-1" d="M6.8 7.2 A7.8 7.8 0 0 1 17.2 7.2" />
+                        <path class="arc-2" d="M8.4 9.0 A5.4 5.4 0 0 1 15.6 9.0" />
+                        <path d="M10 10.8 A3 3 0 0 1 14 10.8" />
+                        <rect x="9" y="13" width="6" height="9" rx="1.6" />
+                        <line x1="10.6" y1="16.3" x2="13.4" y2="16.3" />
+                        <line x1="10.6" y1="18.7" x2="13.4" y2="18.7" />
+                    </svg>
+                    <span id="btnPortonLabel">ABRIR PORTÓN</span>
+                </button>
             </div>
 
             <div id="status">Esperando comando...</div>
 
-            <p class="info">Cada clic en "Ver cámara" pide una sola foto. Si quieres una más reciente, vuelve a
-                presionarlo.</p>
+            <div id="camarasStatus">
+                <div class="cam-item" id="camItem1" onclick="seleccionarCamara(1)">
+                    <div class="cam-dot" id="camDot1"></div>
+                    <span class="cam-label">Puerta Peatonal</span>
+                </div>
+                <div class="cam-item" id="camItem2" onclick="seleccionarCamara(2)">
+                    <div class="cam-dot" id="camDot2"></div>
+                    <span class="cam-label">Portón Exterior</span>
+                </div>
+                <div class="cam-item" id="camItem3" onclick="seleccionarCamara(3)">
+                    <div class="cam-dot" id="camDot3"></div>
+                    <span class="cam-label">Portón Interior</span>
+                </div>
+                <div class="cam-item" id="camItem5" onclick="seleccionarCamara(5)">
+                    <div class="cam-dot" id="camDot5"></div>
+                    <span class="cam-label">Calle Principal</span>
+                </div>
+            </div>
+            <p class="info" style="margin-top:8px;font-size:11px;">Cada toque pide una sola foto nueva, no video en
+                vivo.</p>
 
             <div id="linkAdminWrap" style="margin-top:16px;display:none;">
                 <a href="/admin.html" class="admin-link">Ir al panel de administración →</a>
@@ -668,17 +790,19 @@
         });
 
         // ─────────────────────────────────
-        // FOTO (una sola, a pedido)
+        // CÁMARAS: una foto por toque, nada en bucle
         // ─────────────────────────────────
-        async function pedirFoto() {
-            if (!sessionToken) return;
-            const btn = document.getElementById('btnFoto');
+        let canalActivo = 2;
+
+        async function seleccionarCamara(canal) {
+            canalActivo = canal;
+            actualizarActiveCam(canal);
+
+            const dot = document.getElementById('camDot' + canal);
             const img = document.getElementById('videoStream');
             const placeholder = document.getElementById('videoPlaceholder');
-            const canal = document.getElementById('channel').value;
 
-            btn.disabled = true;
-            btn.textContent = 'Cargando...';
+            dot.classList.add('cargando');
             placeholder.textContent = 'Cargando foto...';
             placeholder.style.display = 'block';
             img.style.display = 'none';
@@ -703,8 +827,13 @@
                 placeholder.textContent = '⚠️ Error de conexión';
             }
 
-            btn.disabled = false;
-            btn.textContent = '📷 Ver cámara';
+            dot.classList.remove('cargando');
+        }
+
+        function actualizarActiveCam(canal) {
+            document.querySelectorAll('.cam-item').forEach(el => el.classList.remove('active-cam'));
+            const item = document.getElementById('camItem' + canal);
+            if (item) item.classList.add('active-cam');
         }
 
         // ─────────────────────────────────
@@ -717,6 +846,7 @@
         async function abrirPorton() {
             if (portonAbierto) return;
             const btn = document.getElementById('btnPorton');
+            const btnPortonLabel = document.getElementById('btnPortonLabel');
             const statusDiv = document.getElementById('status');
 
             btn.disabled = true;
@@ -741,7 +871,7 @@
                     tiempoRestante = 20;
                     btn.classList.remove('btn-closing');
                     btn.classList.add('btn-open');
-                    btn.textContent = `🚪 ABRIENDO (${tiempoRestante - 10}s)`;
+                    btnPortonLabel.textContent = `ABRIENDO (${tiempoRestante - 10}s)`;
                     statusDiv.innerText = "🟢 Portón abriendo...";
                     statusDiv.style.color = "#2ecc71";
 
@@ -752,11 +882,11 @@
                             btn.classList.remove('btn-open');
                             btn.classList.add('btn-closing');
                             btn.classList.add('btn-parpadeando');
-                            btn.textContent = `🔴 CERRANDO (${tiempoRestante}s)`;
+                            btnPortonLabel.textContent = `CERRANDO (${tiempoRestante}s)`;
                             statusDiv.innerText = "🔴 Portón cerrando...";
                             statusDiv.style.color = "#e74c3c";
                         } else {
-                            btn.textContent = `🚪 ABRIENDO (${tiempoRestante - 10}s)`;
+                            btnPortonLabel.textContent = `ABRIENDO (${tiempoRestante - 10}s)`;
                         }
 
                         if (tiempoRestante <= 0) {
@@ -786,7 +916,7 @@
             btn.classList.remove('btn-closing');
             btn.classList.remove('btn-parpadeando');
             btn.classList.add('btn-open');
-            btn.textContent = '🚪 ABRIR PORTÓN';
+            document.getElementById('btnPortonLabel').textContent = 'ABRIR PORTÓN';
             portonAbierto = false;
         }
 
