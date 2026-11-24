@@ -2,7 +2,8 @@ const { getUsuarioPorToken } = require('./_lib/auth');
 const { supabase } = require('./_lib/supabase');
 
 // Usado por la APK (no por el navegador) despues del login: entrega la
-// direccion y credenciales del NVR para que la app conecte directo por NetSDK.
+// direccion y credenciales del NVR para que la app conecte directo por RTSP,
+// y el modo de camara habilitado ('imagen' | 'video' | 'ambos').
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -21,7 +22,7 @@ module.exports = async function handler(req, res) {
 
   const { data, error } = await supabase
     .from('porton_nvr_config')
-    .select('host, puerto, puerto_http, usuario, clave')
+    .select('host, puerto, puerto_http, usuario, clave, modo_camara')
     .limit(1)
     .maybeSingle();
 

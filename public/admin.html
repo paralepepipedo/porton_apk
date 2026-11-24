@@ -605,6 +605,7 @@
                 <div class="sidebar-item" onclick="showSection('secCrear')">➕ Nuevo Usuario</div>
                 <div class="sidebar-item" onclick="showSection('secRegistros')">📋 Registros</div>
                 <div class="sidebar-item" onclick="showSection('secAvisos')">📢 Avisos</div>
+                <div class="sidebar-item" onclick="showSection('secModoCamara')">📷 Modo Cámara</div>
                 <div class="sidebar-item" onclick="irDashboard()">📊 Dashboard</div>
             </div>
 
@@ -694,6 +695,39 @@
                                 style="background:#3a2a1a;border-left:4px solid #e67e22;padding:12px 16px;border-radius:6px;color:#e67e22;font-size:15px;font-weight:600;">
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ─── SECCIÓN: MODO DE CÁMARA (solo app Android) ─── -->
+                <div id="secModoCamara" class="section">
+                    <div class="section-title">📷 Modo de Cámara (app Android)</div>
+                    <div style="max-width:560px;">
+                        <div style="font-size:13px;color:#aaa;margin-bottom:16px;">
+                            Define qué modo(s) puede usar la app Android para ver la cámara
+                            principal. Si habilitas ambos, cada usuario puede elegir y la app
+                            recuerda su última elección. Esto no afecta a la webapp (que
+                            siempre usa foto, para no gastar la cuota gratis de Vercel).
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+                            <label style="font-size:14px;">
+                                <input type="radio" name="modoCamara" value="imagen"
+                                    style="margin-right:8px;accent-color:#2fd47a;">
+                                Solo imagen (foto de refresco continuo)
+                            </label>
+                            <label style="font-size:14px;">
+                                <input type="radio" name="modoCamara" value="video"
+                                    style="margin-right:8px;accent-color:#2fd47a;">
+                                Solo video en vivo (RTSP)
+                            </label>
+                            <label style="font-size:14px;">
+                                <input type="radio" name="modoCamara" value="ambos"
+                                    style="margin-right:8px;accent-color:#2fd47a;">
+                                Ambos (el usuario elige con un interruptor)
+                            </label>
+                        </div>
+                        <button class="btn-action btn-green" style="margin-top:0;"
+                            onclick="guardarModoCamara()">💾 Guardar</button>
+                        <div id="msgModoCamara" class="form-msg"></div>
                     </div>
                 </div>
 
@@ -942,6 +976,7 @@
             if (id === 'secUsuarios') cargarUsuarios();
             if (id === 'secRegistros') { cargarUsuarios(); cargarRegistros(); }
             if (id === 'secAvisos') cargarAvisoActual();
+            if (id === 'secModoCamara') cargarModoCamara();
         }
 
         // ─────────────────────────────────
@@ -1354,6 +1389,50 @@
                     document.getElementById('avisoActualBox').style.display = 'none';
                 }
             } catch (e) { }
+        }
+
+        // ─────────────────────────────────
+        // MODO DE CÁMARA (app Android)
+        // ─────────────────────────────────
+        async function cargarModoCamara() {
+            try {
+                const res = await fetch('/api/modo-camara');
+                const data = await res.json();
+                if (data.success && data.modo_camara) {
+                    const radio = document.querySelector(
+                        'input[name="modoCamara"][value="' + data.modo_camara + '"]');
+                    if (radio) radio.checked = true;
+                }
+            } catch (e) { }
+        }
+
+        async function guardarModoCamara() {
+            const seleccionado = document.querySelector('input[name="modoCamara"]:checked');
+            const msgDiv = document.getElementById('msgModoCamara');
+            msgDiv.className = 'form-msg';
+            if (!seleccionado) {
+                msgDiv.textContent = '❌ Elige una opción.';
+                msgDiv.className = 'form-msg error';
+                return;
+            }
+            try {
+                const res = await fetch('/api/admin/modo-camara', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify({ modo_camara: seleccionado.value })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgDiv.textContent = '✅ Modo de cámara guardado.';
+                    msgDiv.className = 'form-msg success';
+                } else {
+                    msgDiv.textContent = '❌ ' + data.message;
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
         }
 
         // ─────────────────────────────────
