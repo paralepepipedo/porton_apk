@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Porton - Acceso</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="contenedor">
+    <div id="vistaLogin" class="login-caja tarjeta">
+      <h1>Porton</h1>
+      <p style="color:var(--muted)">Ingresa con tu usuario para administrar accesos, o abre la app Android para ver las camaras y el porton.</p>
+      <div id="errorLogin" class="error oculto"></div>
+      <label>Usuario</label>
+      <input id="campoUsuario" autocomplete="username" />
+      <label>Contraseña</label>
+      <input id="campoContrasena" type="password" autocomplete="current-password" />
+      <button id="btnLogin" style="width:100%">Ingresar</button>
+    </div>
+
+    <div id="vistaSesion" class="tarjeta oculto">
+      <div class="barra-superior">
+        <h2 id="saludo"></h2>
+        <button class="secundario" id="btnSalir">Cerrar sesion</button>
+      </div>
+      <div id="avisoBanner" class="aviso-banner oculto"></div>
+      <p style="color:var(--muted)">
+        Tu cuenta esta activa. Las camaras y el boton de apertura del porton estan disponibles
+        en la app Android (conexion directa al NVR). Esta pagina solo sirve para administracion.
+      </p>
+      <p id="linkAdmin" class="oculto"><a href="/admin.html">Ir al panel de administracion</a></p>
+    </div>
+
+    <div id="vistaSuspendido" class="tarjeta oculto">
+      <h2>Acceso suspendido</h2>
+      <p id="mensajeSuspendido" class="error"></p>
+      <button class="secundario" id="btnSalirSuspendido">Cerrar sesion</button>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function guardarSesion(datos) {
+  localStorage.setItem('porton_token', datos.token);
+  localStorage.setItem('porton_perfil', datos.perfil);
+  localStorage.setItem('porton_nombre', datos.nombre || '');
+}
+
+function limpiarSesion() {
+  localStorage.removeItem('porton_token');
+  localStorage.removeItem('porton_perfil');
+  localStorage.removeItem('porton_nombre');
+}
+
+function mostrar(id) {
+  ['vistaLogin', 'vistaSesion', 'vistaSuspendido'].forEach(v => {
+    $(v).classList.toggle('oculto', v !== id);
+  });
+}
+
+async function cargarAviso() {
+  try {
+    const r = await fetch('/api/aviso');
+    const d = await r.json();
+    if (d.success && d.aviso && d.aviso.activo) {
+      $('avisoBanner').textContent = d.aviso.mensaje;
+      $('avisoBanner').classList.remove('oculto');
+    }
+  } catch (e) { /* silencioso: el aviso no es critico */ }
+}
+
+async function verificarSesionActual() {
+  const token = localStorage.getItem('porton_token');
+  if (!token) { mostrar('vistaLogin'); return; }
+
+  try {
+    const r = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    const d = await r.json();
+
+    if (!d.success) { limpiarSesion(); mostrar('vistaLogin'); return; }
+
+    if (!d.habilitado) {
+      $('mensajeSuspendido').textContent = d.mensaje_bloqueo || 'Tu acceso ha sido suspendido.';
+      mostrar('vistaSuspendido');
+      return;
+    }
+
+    $('saludo').textContent = 'Hola, ' + (d.nombre || '');
+    $('linkAdmin').classList.toggle('oculto', d.perfil !== 'admin');
+    mostrar('vistaSesion');
+    cargarAviso();
+  } catch (e) {
+    mostrar('vistaLogin');
+  }
+}
+
+$('btnLogin').addEventListener('click', async () => {
+  const usuario = $('campoUsuario').value.trim();
+  const contrasena = $('campoContrasena').value.trim();
+  $('errorLogin').classList.add('oculto');
+
+  if (!usuario || !contrasena) {
+    $('errorLogin').textContent = 'Usuario y contraseña requeridos';
+    $('errorLogin').classList.remove('oculto');
+    return;
+  }
+
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario, contrasena })
+    });
+    const d = await r.json();
+
+    if (!d.success) {
+      $('errorLogin').textContent = d.message || 'No se pudo iniciar sesion';
+      $('errorLogin').classList.remove('oculto');
+      return;
+    }
+
+    guardarSesion(d);
+    verificarSesionActual();
+  } catch (e) {
+    $('errorLogin').textContent = 'Error de conexion';
+    $('errorLogin').classList.remove('oculto');
+  }
+});
+
+['btnSalir', 'btnSalirSuspendido'].forEach(id => {
+  $(id).addEventListener('click', () => { limpiarSesion(); mostrar('vistaLogin'); });
+});
+
+$('campoContrasena').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') $('btnLogin').click();
+});
+
+verificarSesionActual();
+</script>
+</body>
+</html>

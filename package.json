@@ -1,0 +1,9 @@
+{
+  "name": "porton-apk-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend minimo (Vercel Functions) + panel admin estatico para Porton WebApp, usando Supabase como base de datos.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

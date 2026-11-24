@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Porton - Estadisticas</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="contenedor">
+    <div class="barra-superior">
+      <h1>Estadisticas</h1>
+      <div>
+        <a href="/admin.html" style="margin-right:14px">Volver a administracion</a>
+        <button class="secundario" id="btnSalir">Cerrar sesion</button>
+      </div>
+    </div>
+
+    <div id="noAutorizado" class="tarjeta oculto">
+      <p class="error">No tienes acceso a esta pagina.</p>
+      <a href="/index.html">Volver al inicio</a>
+    </div>
+
+    <div id="panel" class="oculto">
+      <div class="tarjeta">
+        <h2>Resumen</h2>
+        <p>Total de aperturas registradas: <strong id="totalAperturas">-</strong></p>
+        <p>Primera: <span id="rangoPrimera">-</span> &nbsp;|&nbsp; Ultima: <span id="rangoUltima">-</span></p>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Top 10 usuarios</h2>
+        <table>
+          <thead><tr><th>Usuario</th><th>Nombre</th><th>Casa</th><th>Aperturas</th></tr></thead>
+          <tbody id="cuerpoTop"></tbody>
+        </table>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Por mes</h2>
+        <table><thead><tr><th>Mes</th><th>Aperturas</th></tr></thead><tbody id="cuerpoMes"></tbody></table>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Por dia de la semana</h2>
+        <table><thead><tr><th>Dia</th><th>Aperturas</th></tr></thead><tbody id="cuerpoDiaSemana"></tbody></table>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Por hora del dia</h2>
+        <table><thead><tr><th>Hora</th><th>Aperturas</th></tr></thead><tbody id="cuerpoHora"></tbody></table>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Ultimos 30 dias</h2>
+        <table><thead><tr><th>Dia</th><th>Aperturas</th></tr></thead><tbody id="cuerpoDia"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const token = localStorage.getItem('porton_token');
+const perfil = localStorage.getItem('porton_perfil');
+const NOMBRES_DIA = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+
+if (!token || perfil !== 'admin') {
+  document.addEventListener('DOMContentLoaded', () => $('noAutorizado').classList.remove('oculto'));
+} else {
+  document.addEventListener('DOMContentLoaded', cargarEstadisticas);
+}
+
+$('btnSalir').addEventListener('click', () => { localStorage.clear(); location.href = '/index.html'; });
+
+function fila(cols) { return '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>'; }
+
+async function cargarEstadisticas() {
+  const r = await fetch('/api/admin/estadisticas', { headers: { 'X-Token': token } });
+  const d = await r.json();
+  if (!d.success) { alert(d.message || 'Error cargando estadisticas'); return; }
+
+  $('panel').classList.remove('oculto');
+  $('totalAperturas').textContent = d.total;
+  $('rangoPrimera').textContent = d.rango.primera || '-';
+  $('rangoUltima').textContent = d.rango.ultima || '-';
+
+  $('cuerpoTop').innerHTML = d.top_usuarios.map(u =>
+    fila([u.nombre_usuario, u.nombre || '', u.casa || '', u.total])
+  ).join('');
+
+  $('cuerpoMes').innerHTML = d.por_mes.map(m => fila([m.mes, m.total])).join('');
+
+  $('cuerpoDiaSemana').innerHTML = d.por_dia_semana.map(x =>
+    fila([NOMBRES_DIA[x.dia_semana] || x.dia_semana, x.total])
+  ).join('');
+
+  $('cuerpoHora').innerHTML = d.por_hora.map(h =>
+    fila([String(h.hora).padStart(2, '0') + ':00', h.total])
+  ).join('');
+
+  $('cuerpoDia').innerHTML = d.por_dia.map(x => fila([x.dia, x.total])).join('');
+}
+</script>
+</body>
+</html>

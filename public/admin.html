@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Porton - Administracion</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="contenedor">
+    <div class="barra-superior">
+      <h1>Administracion</h1>
+      <div>
+        <a href="/dashboard.html" style="margin-right:14px">Estadisticas</a>
+        <button class="secundario" id="btnSalir">Cerrar sesion</button>
+      </div>
+    </div>
+
+    <div id="noAutorizado" class="tarjeta oculto">
+      <p class="error">No tienes acceso a esta pagina.</p>
+      <a href="/index.html">Volver al inicio</a>
+    </div>
+
+    <div id="panel" class="oculto">
+      <div class="tabs">
+        <button id="tabUsuarios" class="activa">Usuarios</button>
+        <button id="tabAvisos">Avisos</button>
+      </div>
+
+      <div id="vistaUsuarios">
+        <div class="tarjeta">
+          <div class="barra-superior">
+            <h2 style="margin:0">Usuarios (<span id="totalUsuarios">0</span>)</h2>
+            <button id="btnNuevoUsuario">+ Nuevo usuario</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario</th><th>Nombre</th><th>Perfil</th><th>Casa</th>
+                  <th>Telefono</th><th>Correo</th><th>Estado</th><th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="cuerpoUsuarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="vistaAvisos" class="oculto">
+        <div class="tarjeta">
+          <h2>Aviso actual</h2>
+          <p id="avisoActualTexto" style="color:var(--muted)">(sin aviso activo)</p>
+          <label>Nuevo mensaje</label>
+          <textarea id="campoMensajeAviso" rows="3" placeholder="Escribe el aviso para todos los usuarios"></textarea>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <input type="checkbox" id="campoAvisoActivo" style="width:auto;margin:0" checked />
+            Mostrar como activo
+          </label>
+          <button id="btnGuardarAviso" style="margin-top:10px">Guardar aviso</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de usuario (crear / editar) -->
+  <div id="modalUsuario" class="oculto" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px">
+    <div class="tarjeta" style="max-width:420px;width:100%">
+      <h2 id="tituloModal">Nuevo usuario</h2>
+      <input type="hidden" id="idUsuario" />
+      <label>Usuario</label>
+      <input id="campoNombreUsuario" />
+      <label>Contraseña <span id="ayudaClave" style="color:var(--muted)"></span></label>
+      <input id="campoClave" />
+      <label>Perfil</label>
+      <select id="campoPerfil">
+        <option value="user">user</option>
+        <option value="admin">admin</option>
+      </select>
+      <label>Nombre</label>
+      <input id="campoNombre" />
+      <label>Telefono</label>
+      <input id="campoTelefono" />
+      <label>Correo</label>
+      <input id="campoCorreo" />
+      <label>Patente / PPU</label>
+      <input id="campoPpu" />
+      <label>Casa</label>
+      <input id="campoCasa" />
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="campoHabilitado" style="width:auto;margin:0" checked />
+        Habilitado
+      </label>
+      <label>Mensaje de bloqueo (si esta deshabilitado)</label>
+      <input id="campoMensajeBloqueo" />
+      <div id="errorModal" class="error oculto"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="btnGuardarUsuario">Guardar</button>
+        <button class="secundario" id="btnCerrarModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const token = localStorage.getItem('porton_token');
+const perfil = localStorage.getItem('porton_perfil');
+
+function cabeceras() {
+  return { 'Content-Type': 'application/json', 'X-Token': token || '' };
+}
+
+if (!token || perfil !== 'admin') {
+  document.addEventListener('DOMContentLoaded', () => $('noAutorizado').classList.remove('oculto'));
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    $('panel').classList.remove('oculto');
+    cargarUsuarios();
+    cargarAvisoActual();
+  });
+}
+
+$('btnSalir').addEventListener('click', () => {
+  localStorage.clear();
+  location.href = '/index.html';
+});
+
+// --- Tabs ---
+$('tabUsuarios').addEventListener('click', () => cambiarTab('usuarios'));
+$('tabAvisos').addEventListener('click', () => cambiarTab('avisos'));
+function cambiarTab(cual) {
+  $('vistaUsuarios').classList.toggle('oculto', cual !== 'usuarios');
+  $('vistaAvisos').classList.toggle('oculto', cual !== 'avisos');
+  $('tabUsuarios').classList.toggle('activa', cual === 'usuarios');
+  $('tabAvisos').classList.toggle('activa', cual === 'avisos');
+}
+
+// --- Usuarios ---
+let usuariosCache = [];
+
+async function cargarUsuarios() {
+  const r = await fetch('/api/admin/usuarios', { headers: cabeceras() });
+  const d = await r.json();
+  if (!d.success) { alert(d.message || 'Error cargando usuarios'); return; }
+  usuariosCache = d.usuarios;
+  $('totalUsuarios').textContent = usuariosCache.length;
+  $('cuerpoUsuarios').innerHTML = usuariosCache.map(filaUsuario).join('');
+  usuariosCache.forEach(u => {
+    $('btnEditar_' + u.id).addEventListener('click', () => abrirModal(u));
+    $('btnToggle_' + u.id).addEventListener('click', () => toggleHabilitado(u));
+    $('btnEliminar_' + u.id).addEventListener('click', () => eliminarUsuario(u));
+  });
+}
+
+function filaUsuario(u) {
+  const estado = u.habilitado
+    ? '<span class="pill on">Habilitado</span>'
+    : '<span class="pill off">Deshabilitado</span>';
+  return `<tr>
+    <td>${u.nombre_usuario}</td>
+    <td>${u.nombre || ''}</td>
+    <td>${u.perfil}</td>
+    <td>${u.casa || ''}</td>
+    <td>${u.telefono || ''}</td>
+    <td>${u.correo || ''}</td>
+    <td>${estado}</td>
+    <td class="acciones-fila">
+      <button class="secundario" id="btnEditar_${u.id}">Editar</button>
+      <button class="secundario" id="btnToggle_${u.id}">${u.habilitado ? 'Deshabilitar' : 'Habilitar'}</button>
+      <button class="peligro" id="btnEliminar_${u.id}">Eliminar</button>
+    </td>
+  </tr>`;
+}
+
+function abrirModal(usuario) {
+  $('errorModal').classList.add('oculto');
+  if (usuario) {
+    $('tituloModal').textContent = 'Editar usuario';
+    $('idUsuario').value = usuario.id;
+    $('campoNombreUsuario').value = usuario.nombre_usuario;
+    $('campoClave').value = '';
+    $('ayudaClave').textContent = '(dejar vacio para no cambiarla)';
+    $('campoPerfil').value = usuario.perfil;
+    $('campoNombre').value = usuario.nombre || '';
+    $('campoTelefono').value = usuario.telefono || '';
+    $('campoCorreo').value = usuario.correo || '';
+    $('campoPpu').value = usuario.ppu || '';
+    $('campoCasa').value = usuario.casa || '';
+    $('campoHabilitado').checked = !!usuario.habilitado;
+    $('campoMensajeBloqueo').value = usuario.mensaje_bloqueo || '';
+  } else {
+    $('tituloModal').textContent = 'Nuevo usuario';
+    $('idUsuario').value = '';
+    ['campoNombreUsuario','campoClave','campoNombre','campoTelefono','campoCorreo','campoPpu','campoCasa','campoMensajeBloqueo']
+      .forEach(id => $(id).value = '');
+    $('ayudaClave').textContent = '';
+    $('campoPerfil').value = 'user';
+    $('campoHabilitado').checked = true;
+  }
+  $('modalUsuario').classList.remove('oculto');
+}
+
+$('btnNuevoUsuario').addEventListener('click', () => abrirModal(null));
+$('btnCerrarModal').addEventListener('click', () => $('modalUsuario').classList.add('oculto'));
+
+$('btnGuardarUsuario').addEventListener('click', async () => {
+  const id = $('idUsuario').value;
+  const cuerpo = {
+    nombre_usuario: $('campoNombreUsuario').value.trim(),
+    perfil: $('campoPerfil').value,
+    nombre: $('campoNombre').value.trim(),
+    telefono: $('campoTelefono').value.trim(),
+    correo: $('campoCorreo').value.trim(),
+    ppu: $('campoPpu').value.trim(),
+    casa: $('campoCasa').value.trim(),
+    mensaje_bloqueo: $('campoMensajeBloqueo').value.trim(),
+    habilitado: $('campoHabilitado').checked
+  };
+  const clave = $('campoClave').value.trim();
+
+  $('errorModal').classList.add('oculto');
+
+  try {
+    let r, d;
+    if (id) {
+      if (clave) cuerpo.contrasena = clave;
+      r = await fetch('/api/admin/usuarios/' + id, {
+        method: 'PUT', headers: cabeceras(), body: JSON.stringify(cuerpo)
+      });
+    } else {
+      if (!clave) {
+        $('errorModal').textContent = 'La contraseña es obligatoria para un usuario nuevo';
+        $('errorModal').classList.remove('oculto');
+        return;
+      }
+      cuerpo.contrasena = clave;
+      r = await fetch('/api/admin/usuarios', {
+        method: 'POST', headers: cabeceras(), body: JSON.stringify(cuerpo)
+      });
+    }
+    d = await r.json();
+    if (!d.success) {
+      $('errorModal').textContent = d.message || 'Error guardando usuario';
+      $('errorModal').classList.remove('oculto');
+      return;
+    }
+    $('modalUsuario').classList.add('oculto');
+    cargarUsuarios();
+  } catch (e) {
+    $('errorModal').textContent = 'Error de conexion';
+    $('errorModal').classList.remove('oculto');
+  }
+});
+
+async function toggleHabilitado(usuario) {
+  const r = await fetch('/api/admin/usuarios/' + usuario.id, {
+    method: 'PUT', headers: cabeceras(),
+    body: JSON.stringify({ habilitado: !usuario.habilitado })
+  });
+  const d = await r.json();
+  if (!d.success) { alert(d.message || 'Error'); return; }
+  cargarUsuarios();
+}
+
+async function eliminarUsuario(usuario) {
+  if (!confirm('Eliminar al usuario "' + usuario.nombre_usuario + '"? Esta accion no se puede deshacer.')) return;
+  const r = await fetch('/api/admin/usuarios/' + usuario.id, { method: 'DELETE', headers: cabeceras() });
+  const d = await r.json();
+  if (!d.success) { alert(d.message || 'Error'); return; }
+  cargarUsuarios();
+}
+
+// --- Avisos ---
+async function cargarAvisoActual() {
+  const r = await fetch('/api/aviso');
+  const d = await r.json();
+  if (d.success && d.aviso) {
+    $('avisoActualTexto').textContent = (d.aviso.activo ? 'Activo: ' : 'Inactivo: ') + d.aviso.mensaje;
+  }
+}
+
+$('btnGuardarAviso').addEventListener('click', async () => {
+  const mensaje = $('campoMensajeAviso').value.trim();
+  const activo = $('campoAvisoActivo').checked;
+  const r = await fetch('/api/admin/aviso', {
+    method: 'POST', headers: cabeceras(), body: JSON.stringify({ mensaje, activo })
+  });
+  const d = await r.json();
+  if (!d.success) { alert(d.message || 'Error guardando aviso'); return; }
+  $('campoMensajeAviso').value = '';
+  cargarAvisoActual();
+});
+</script>
+</body>
+</html>
