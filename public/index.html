@@ -542,7 +542,7 @@
 </head>
 
 <body>
-    <button id="btnInstall">📲 Instalar App</button>
+    <button id="btnInstall">Instalar app</button>
 
     <!-- ─── PANTALLA DE LOGIN ─── -->
     <div id="loginScreen">
@@ -573,7 +573,13 @@
     <!-- ─── PANTALLA BLOQUEADO ─── -->
     <div id="blockedScreen">
         <div class="blocked-box">
-            <div class="blocked-icon">🔒</div>
+            <div class="blocked-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:56px;height:56px;color:#e74c3c;">
+                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+            </div>
             <h2>Acceso Suspendido</h2>
             <div class="blocked-message" id="mensajeBloqueo">
                 Tu acceso ha sido suspendido. Contacta al administrador para más información.
@@ -586,8 +592,11 @@
     <div id="mainScreen">
         <div class="container">
             <div class="user-bar">
-                <div>👤 <span id="nombreUsuario">Usuario</span></div>
-                <button onclick="cerrarSesion()">Cerrar sesión</button>
+                <div><span id="nombreUsuario">Usuario</span></div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <a id="linkAdmin" href="/admin.html" class="admin-link" style="display:none;font-size:12px;">Administración</a>
+                    <button onclick="cerrarSesion()">Cerrar sesión</button>
+                </div>
             </div>
 
             <h1 class="brandname">AltoCasares<span class="num">1</span></h1>
@@ -601,23 +610,6 @@
                 <img id="videoStream" alt="Cámara">
                 <div id="videoPlaceholder" class="video-placeholder">Tocá una cámara para pedir una foto</div>
             </div>
-
-            <div class="controls">
-                <button id="btnPorton" class="btn btn-open" onclick="abrirPorton()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path class="arc-1" d="M6.8 7.2 A7.8 7.8 0 0 1 17.2 7.2" />
-                        <path class="arc-2" d="M8.4 9.0 A5.4 5.4 0 0 1 15.6 9.0" />
-                        <path d="M10 10.8 A3 3 0 0 1 14 10.8" />
-                        <rect x="9" y="13" width="6" height="9" rx="1.6" />
-                        <line x1="10.6" y1="16.3" x2="13.4" y2="16.3" />
-                        <line x1="10.6" y1="18.7" x2="13.4" y2="18.7" />
-                    </svg>
-                    <span id="btnPortonLabel">ABRIR PORTÓN</span>
-                </button>
-            </div>
-
-            <div id="status">Esperando comando...</div>
 
             <div id="camarasStatus">
                 <div class="cam-item" id="camItem1" onclick="seleccionarCamara(1)">
@@ -640,9 +632,22 @@
             <p class="info" style="margin-top:8px;font-size:11px;">Cada toque pide una sola foto nueva, no video en
                 vivo.</p>
 
-            <div id="linkAdminWrap" style="margin-top:16px;display:none;">
-                <a href="/admin.html" class="admin-link">Ir al panel de administración →</a>
+            <div class="controls">
+                <button id="btnPorton" class="btn btn-open" onclick="abrirPorton()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path class="arc-1" d="M6.8 7.2 A7.8 7.8 0 0 1 17.2 7.2" />
+                        <path class="arc-2" d="M8.4 9.0 A5.4 5.4 0 0 1 15.6 9.0" />
+                        <path d="M10 10.8 A3 3 0 0 1 14 10.8" />
+                        <rect x="9" y="13" width="6" height="9" rx="1.6" />
+                        <line x1="10.6" y1="16.3" x2="13.4" y2="16.3" />
+                        <line x1="10.6" y1="18.7" x2="13.4" y2="18.7" />
+                    </svg>
+                    <span id="btnPortonLabel">ABRIR PORTÓN</span>
+                </button>
             </div>
+
+            <div id="status">Esperando comando...</div>
         </div>
     </div>
 
@@ -703,7 +708,7 @@
             document.getElementById('blockedScreen').classList.remove('active');
             document.getElementById('mainScreen').classList.add('active');
             document.getElementById('nombreUsuario').textContent = nombre || 'Usuario';
-            document.getElementById('linkAdminWrap').style.display = userPerfil === 'admin' ? 'block' : 'none';
+            document.getElementById('linkAdmin').style.display = userPerfil === 'admin' ? 'inline' : 'none';
             verificarAviso();
         }
 
@@ -713,7 +718,7 @@
                 const data = await res.json();
                 const box = document.getElementById('avisoBox');
                 if (data.aviso && data.aviso.activo) {
-                    box.textContent = '⚠️ ' + data.aviso.mensaje;
+                    box.textContent = data.aviso.mensaje;
                     box.style.display = 'block';
                 } else {
                     box.style.display = 'none';
@@ -813,7 +818,7 @@
                 });
                 if (!res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    placeholder.textContent = '⚠️ ' + (data.message || 'No se pudo obtener la foto');
+                    placeholder.textContent = data.message || 'No se pudo obtener la foto';
                 } else {
                     const blob = await res.blob();
                     if (img.dataset.blobUrl) URL.revokeObjectURL(img.dataset.blobUrl);
@@ -824,7 +829,7 @@
                     placeholder.style.display = 'none';
                 }
             } catch (e) {
-                placeholder.textContent = '⚠️ Error de conexión';
+                placeholder.textContent = 'Error de conexión';
             }
 
             dot.classList.remove('cargando');
@@ -852,8 +857,10 @@
             btn.disabled = true;
             portonAbierto = true;
             statusDiv.style.display = 'block';
-            statusDiv.innerText = "🚪 Abriendo portón...";
+            statusDiv.innerText = "Abriendo portón...";
             statusDiv.style.color = "#3498db";
+
+            seleccionarCamara(canalActivo);
 
             try {
                 const res = await fetch('/api/alarm', {
@@ -872,7 +879,7 @@
                     btn.classList.remove('btn-closing');
                     btn.classList.add('btn-open');
                     btnPortonLabel.textContent = `ABRIENDO (${tiempoRestante - 10}s)`;
-                    statusDiv.innerText = "🟢 Portón abriendo...";
+                    statusDiv.innerText = "Portón abriendo...";
                     statusDiv.style.color = "#2ecc71";
 
                     timerInterval = setInterval(() => {
@@ -883,7 +890,7 @@
                             btn.classList.add('btn-closing');
                             btn.classList.add('btn-parpadeando');
                             btnPortonLabel.textContent = `CERRANDO (${tiempoRestante}s)`;
-                            statusDiv.innerText = "🔴 Portón cerrando...";
+                            statusDiv.innerText = "Portón cerrando...";
                             statusDiv.style.color = "#e74c3c";
                         } else {
                             btnPortonLabel.textContent = `ABRIENDO (${tiempoRestante - 10}s)`;
@@ -897,13 +904,13 @@
                         }
                     }, 1000);
                 } else {
-                    statusDiv.innerText = "❌ " + data.message;
+                    statusDiv.innerText = data.message;
                     statusDiv.style.color = "#e74c3c";
                     setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
                     resetButton();
                 }
             } catch (e) {
-                statusDiv.innerText = "❌ Error de conexión";
+                statusDiv.innerText = "Error de conexión";
                 statusDiv.style.color = "#e74c3c";
                 setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
                 resetButton();
