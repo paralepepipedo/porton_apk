@@ -1,295 +1,1519 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Porton - Administracion</title>
-<link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Control Portón</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #111;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* ─── LOGIN ADMIN ─── */
+        #loginScreen {
+            display: none;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loginScreen.active {
+            display: flex;
+        }
+
+        .login-box {
+            background: #1e1e1e;
+            padding: 40px 32px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 360px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .login-box h2 {
+            color: #fff;
+            margin-bottom: 6px;
+            font-size: 1.4rem;
+        }
+
+        .login-box p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 7px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .field input:focus {
+            border-color: #3498db;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-primary:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+
+        #loginErr {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 12px;
+            min-height: 18px;
+        }
+
+        /* ─── PANEL ADMIN ─── */
+        #adminPanel {
+            display: none;
+        }
+
+        #adminPanel.active {
+            display: block;
+        }
+
+        .topbar {
+            background: #1e1e1e;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar h1 {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .topbar span {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .btn-sm {
+            padding: 7px 16px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: transparent;
+            color: #aaa;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-sm:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 57px);
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #1a1a1a;
+            border-right: 1px solid #2a2a2a;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #888;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .sidebar-item:hover {
+            color: #fff;
+            background: #222;
+        }
+
+        .sidebar-item.active {
+            color: #3498db;
+            border-left-color: #3498db;
+            background: #1e2530;
+        }
+
+        .content {
+            flex: 1;
+            padding: 28px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        /* ─── FORMULARIO USUARIO ─── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            max-width: 680px;
+        }
+
+        .form-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 9px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus {
+            border-color: #3498db;
+        }
+
+        .required-star {
+            color: #e74c3c;
+        }
+
+        .optional-tag {
+            color: #555;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+
+        .btn-action {
+            padding: 10px 24px;
+            border-radius: 7px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .btn-green {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn-green:hover {
+            background: #229954;
+        }
+
+        .btn-blue {
+            background: #3498db;
+            color: #fff;
+        }
+
+        .btn-blue:hover {
+            background: #2980b9;
+        }
+
+        .btn-red {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-red:hover {
+            background: #c0392b;
+        }
+
+        .btn-orange {
+            background: #e67e22;
+            color: #fff;
+        }
+
+        .btn-orange:hover {
+            background: #ca6f1e;
+        }
+
+        .btn-gray {
+            background: #444;
+            color: #ccc;
+        }
+
+        .btn-gray:hover {
+            background: #555;
+        }
+
+        .form-msg {
+            margin-top: 12px;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .form-msg.success {
+            background: #1a3a2a;
+            color: #2ecc71;
+            border: 1px solid #27ae60;
+            display: block;
+        }
+
+        .form-msg.error {
+            background: #3a1a1a;
+            color: #e74c3c;
+            border: 1px solid #c0392b;
+            display: block;
+        }
+
+        /* ─── TABLA ─── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead tr {
+            background: #1a1a1a;
+        }
+
+        th {
+            padding: 10px 14px;
+            text-align: left;
+            color: #888;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #1e1e1e;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #1a1a1a;
+        }
+
+        .badge {
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background: #1a3a2a;
+            color: #2ecc71;
+        }
+
+        .badge-red {
+            background: #3a1a1a;
+            color: #e74c3c;
+        }
+
+        .badge-blue {
+            background: #1a2a3a;
+            color: #3498db;
+        }
+
+        .badge-gray {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-tiny {
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: none;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-tiny-blue {
+            background: #1a2a3a;
+            color: #3498db;
+        }
+
+        .btn-tiny-blue:hover {
+            background: #3498db;
+            color: #fff;
+        }
+
+        .btn-tiny-green {
+            background: #1a3a2a;
+            color: #2ecc71;
+        }
+
+        .btn-tiny-green:hover {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn-tiny-red {
+            background: #3a1a1a;
+            color: #e74c3c;
+        }
+
+        .btn-tiny-red:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-tiny-orange {
+            background: #3a2a1a;
+            color: #e67e22;
+        }
+
+        .btn-tiny-orange:hover {
+            background: #e67e22;
+            color: #fff;
+        }
+
+        /* ─── MODAL ─── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e1e1e;
+            border-radius: 14px;
+            padding: 28px;
+            width: 100%;
+            max-width: 560px;
+            border: 1px solid #2a2a2a;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        /* ─── FILTRO REGISTROS ─── */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .filter-bar select:focus,
+        .filter-bar input:focus {
+            border-color: #3498db;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #555;
+            padding: 40px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 160px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+                padding: 8px 0;
+                border-right: none;
+                border-bottom: 1px solid #2a2a2a;
+            }
+
+            .sidebar-item {
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                padding: 8px 14px;
+            }
+
+            .sidebar-item.active {
+                border-left: none;
+                border-bottom-color: #3498db;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="contenedor">
-    <div class="barra-superior">
-      <h1>Administracion</h1>
-      <div>
-        <a href="/dashboard.html" style="margin-right:14px">Estadisticas</a>
-        <button class="secundario" id="btnSalir">Cerrar sesion</button>
-      </div>
+
+    <!-- ─── LOGIN ADMIN ─── -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>⚙️ Administración</h2>
+            <p>Solo administradores autorizados</p>
+            <div class="field">
+                <label>Usuario</label>
+                <input type="text" id="aUsuario" autocomplete="username">
+            </div>
+            <div class="field">
+                <label>Contraseña</label>
+                <input type="password" id="aPass" autocomplete="current-password">
+            </div>
+            <button class="btn-primary" id="btnAdminLogin" onclick="adminLogin()">Ingresar</button>
+            <div id="loginErr"></div>
+        </div>
     </div>
 
-    <div id="noAutorizado" class="tarjeta oculto">
-      <p class="error">No tienes acceso a esta pagina.</p>
-      <a href="/index.html">Volver al inicio</a>
+    <!-- ─── PANEL ADMIN ─── -->
+    <div id="adminPanel">
+        <div class="topbar">
+            <h1>⚙️ Panel de Administración</h1>
+            <div style="display:flex;gap:12px;align-items:center;">
+                <span id="adminNombre"></span>
+                <button class="btn-sm" onclick="adminLogout()">Salir</button>
+            </div>
+        </div>
+
+        <div class="layout">
+            <div class="sidebar">
+                <div class="sidebar-item active" onclick="showSection('secUsuarios')">👥 Usuarios</div>
+                <div class="sidebar-item" onclick="showSection('secCrear')">➕ Nuevo Usuario</div>
+                <div class="sidebar-item" onclick="showSection('secRegistros')">📋 Registros</div>
+                <div class="sidebar-item" onclick="showSection('secAvisos')">📢 Avisos</div>
+                <div class="sidebar-item" onclick="irDashboard()">📊 Dashboard</div>
+            </div>
+
+            <div class="content">
+
+                <!-- ─── SECCIÓN: LISTA USUARIOS ─── -->
+                <div id="secUsuarios" class="section active">
+                    <div class="section-title">Usuarios del Sistema</div>
+                    <div class="filter-bar" style="margin-bottom:16px;">
+                        <input type="text" id="buscadorUsuarios" placeholder="🔍 Buscar..." oninput="filtrarUsuarios()"
+                            style="min-width:220px;">
+                    </div>
+                    <div id="tablaUsuariosWrap"></div>
+                </div>
+
+                <!-- ─── SECCIÓN: CREAR USUARIO ─── -->
+                <div id="secCrear" class="section">
+                    <div class="section-title">Nuevo Usuario</div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label>Usuario <span class="required-star">*</span></label>
+                            <input type="text" id="cUsuario" placeholder="ej: casa5">
+                        </div>
+                        <div class="form-field">
+                            <label>Contraseña <span class="required-star">*</span></label>
+                            <input type="text" id="cPass" placeholder="ej: 1234abc">
+                        </div>
+                        <div class="form-field">
+                            <label>Perfil <span class="required-star">*</span></label>
+                            <select id="cPerfil">
+                                <option value="user">Usuario</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Casa <span class="optional-tag">(opcional)</span></label>
+                            <input type="text" id="cCasa" placeholder="ej: Casa 12 - Block A">
+                        </div>
+                        <div class="form-field">
+                            <label>Nombre <span class="optional-tag">(opcional)</span></label>
+                            <input type="text" id="cNombre" placeholder="Nombre de contacto">
+                        </div>
+                        <div class="form-field">
+                            <label>Teléfono <span class="optional-tag">(opcional)</span></label>
+                            <input type="text" id="cTel" placeholder="+56 9 XXXX XXXX">
+                        </div>
+                        <div class="form-field">
+                            <label>Correo <span class="optional-tag">(opcional)</span></label>
+                            <input type="text" id="cCorreo" placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="form-field">
+                            <label>PPU (Patente) <span class="optional-tag">(opcional)</span></label>
+                            <input type="text" id="cPpu" placeholder="ej: ABCD12">
+                        </div>
+                    </div>
+                    <button class="btn-action btn-green" onclick="crearUsuario()">✅ Crear Usuario</button>
+                    <div id="msgCrear" class="form-msg"></div>
+                </div>
+
+                <!-- ─── SECCIÓN: AVISOS ─── -->
+                <div id="secAvisos" class="section">
+                    <div class="section-title">📢 Aviso para Usuarios</div>
+                    <div style="max-width:560px;">
+                        <div class="form-field" style="margin-bottom:14px;">
+                            <label>Mensaje</label>
+                            <input type="text" id="avisoMensaje" placeholder="ej: Portón en modo MANUAL"
+                                style="width:100%; font-size:15px; padding:12px;">
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;">
+                            <label style="font-size:13px;color:#aaa;">
+                                <input type="checkbox" id="avisoActivo" checked
+                                    style="margin-right:6px;accent-color:#e67e22;">
+                                Mostrar aviso a los usuarios
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn-action btn-orange" style="margin-top:0;" onclick="guardarAviso()">💾
+                                Guardar Aviso</button>
+                            <button class="btn-action btn-gray" style="margin-top:0;" onclick="desactivarAviso()">🗑️
+                                Quitar Aviso</button>
+                        </div>
+                        <div id="msgAviso" class="form-msg"></div>
+                        <div id="avisoActualBox" style="margin-top:20px;display:none;">
+                            <div style="font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;">Aviso
+                                activo actualmente:</div>
+                            <div id="avisoActualTexto"
+                                style="background:#3a2a1a;border-left:4px solid #e67e22;padding:12px 16px;border-radius:6px;color:#e67e22;font-size:15px;font-weight:600;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── SECCIÓN: REGISTROS ─── -->
+                <div id="secRegistros" class="section">
+                    <div class="section-title">Registro de Aperturas</div>
+                    <div class="filter-bar">
+                        <select id="filtroUsuario" onchange="aplicarFiltros()">
+                            <option value="">Todos los usuarios</option>
+                        </select>
+                        <select id="filtroAnio" onchange="aplicarFiltros()">
+                            <option value="">Año</option>
+                        </select>
+                        <select id="filtroMes" onchange="aplicarFiltros()">
+                            <option value="">Mes</option>
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <select id="filtroDia" onchange="aplicarFiltros()">
+                            <option value="">Día</option>
+                        </select>
+                        <button class="btn-action btn-gray" style="margin-top:0;padding:8px 16px;"
+                            onclick="limpiarFiltrosFecha()">✕ Limpiar</button>
+                        <button class="btn-action btn-blue" style="margin-top:0;padding:8px 16px;"
+                            onclick="cargarRegistros()">🔄 Actualizar</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Casa</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRegistros">
+                                <tr>
+                                    <td colspan="5" class="empty-state">Cargando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="paginacionRegistros"
+                        style="display:none;justify-content:center;align-items:center;gap:12px;margin-top:16px;">
+                        <button class="btn-action btn-gray" style="margin-top:0;padding:8px 16px;" id="btnPagAnterior"
+                            onclick="cambiarPagina(-1)">← Anterior</button>
+                        <span id="pagInfo" style="font-size:13px;color:#888;"></span>
+                        <button class="btn-action btn-gray" style="margin-top:0;padding:8px 16px;" id="btnPagSiguiente"
+                            onclick="cambiarPagina(1)">Siguiente →</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
-    <div id="panel" class="oculto">
-      <div class="tabs">
-        <button id="tabUsuarios" class="activa">Usuarios</button>
-        <button id="tabAvisos">Avisos</button>
-      </div>
+    <!-- ─── MODAL: EDITAR USUARIO ─── -->
+    <div id="modalEditar" class="modal-overlay">
+        <div class="modal">
+            <h3>✏️ Editar Usuario</h3>
+            <input type="hidden" id="eId">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label>Usuario <span class="required-star">*</span></label>
+                    <input type="text" id="eUsuario">
+                </div>
+                <div class="form-field">
+                    <label>Contraseña <span class="optional-tag">(dejar en blanco = no cambiar)</span></label>
+                    <input type="text" id="ePass" placeholder="Nueva contraseña">
+                </div>
+                <div class="form-field">
+                    <label>Perfil</label>
+                    <select id="ePerfil">
+                        <option value="user">Usuario</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Casa</label>
+                    <input type="text" id="eCasa">
+                </div>
+                <div class="form-field">
+                    <label>Nombre</label>
+                    <input type="text" id="eNombre">
+                </div>
+                <div class="form-field">
+                    <label>Teléfono</label>
+                    <input type="text" id="eTel">
+                </div>
+                <div class="form-field full">
+                    <label>Correo</label>
+                    <input type="text" id="eCorreo">
+                </div>
+                <div class="form-field">
+                    <label>PPU (Patente)</label>
+                    <input type="text" id="ePpu">
+                </div>
+            </div>
+            <div id="msgEditar" class="form-msg"></div>
+            <div class="modal-actions">
+                <button class="btn-action btn-gray" style="margin-top:0;"
+                    onclick="cerrarModal('modalEditar')">Cancelar</button>
+                <button class="btn-action btn-blue" style="margin-top:0;" onclick="guardarEdicion()">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
 
-      <div id="vistaUsuarios">
-        <div class="tarjeta">
-          <div class="barra-superior">
-            <h2 style="margin:0">Usuarios (<span id="totalUsuarios">0</span>)</h2>
-            <button id="btnNuevoUsuario">+ Nuevo usuario</button>
-          </div>
-          <div style="overflow-x:auto">
-            <table>
-              <thead>
+    <!-- ─── MODAL: BORRAR USUARIO ─── -->
+    <div id="modalBorrar" class="modal-overlay">
+        <div class="modal">
+            <h3>🗑️ Eliminar Usuario</h3>
+            <input type="hidden" id="borrarId">
+            <div id="borrarPaso1">
+                <p style="color:#aaa;font-size:14px;margin-bottom:8px;">Vas a eliminar al usuario:</p>
+                <p id="borrarNombreUsuario" style="color:#fff;font-size:16px;font-weight:700;margin-bottom:16px;"></p>
+                <p style="color:#e74c3c;font-size:13px;">Esta acción eliminará al usuario y todo su historial. No se
+                    puede deshacer.</p>
+            </div>
+            <div id="borrarPaso2" style="display:none;">
+                <p style="color:#aaa;font-size:14px;margin-bottom:10px;">Para confirmar, escribe el nombre de usuario:
+                </p>
+                <div class="form-field">
+                    <input type="text" id="borrarConfirmInput" placeholder="Escribe el usuario exacto"
+                        style="width:100%;" oninput="verificarConfirmBorrar()">
+                </div>
+                <p id="borrarConfirmError" style="color:#e74c3c;font-size:12px;margin-top:6px;min-height:16px;"></p>
+            </div>
+            <div id="msgBorrar" class="form-msg"></div>
+            <div class="modal-actions">
+                <button class="btn-action btn-gray" style="margin-top:0;"
+                    onclick="cerrarModal('modalBorrar')">Cancelar</button>
+                <button class="btn-action btn-orange" style="margin-top:0;" id="btnBorrarPaso1"
+                    onclick="avanzarPasoBorrar()">Continuar →</button>
+                <button class="btn-action btn-red" style="margin-top:0;display:none;" id="btnBorrarConfirmar" disabled
+                    onclick="confirmarBorrar()">🗑️ Eliminar definitivamente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MODAL: BLOQUEAR USUARIO ─── -->
+    <div id="modalBloquear" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modalBloquearTitulo">🔒 Deshabilitar Usuario</h3>
+            <input type="hidden" id="bId">
+            <input type="hidden" id="bAccion">
+            <div id="msgBloqueoCampo">
+                <div class="form-field" style="margin-bottom:14px;">
+                    <label>Mensaje para el usuario</label>
+                    <input type="text" id="bMensaje" placeholder="ej: Acceso suspendido por falta de pago"
+                        style="width:100%">
+                </div>
+                <p style="font-size:12px;color:#666;">Este mensaje verá el usuario al intentar ingresar.</p>
+            </div>
+            <div id="msgBloquear" class="form-msg"></div>
+            <div class="modal-actions">
+                <button class="btn-action btn-gray" style="margin-top:0;"
+                    onclick="cerrarModal('modalBloquear')">Cancelar</button>
+                <button class="btn-action btn-red" style="margin-top:0;" id="btnConfirmarBloqueo"
+                    onclick="confirmarBloqueo()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = null;
+        let listaUsuarios = [];
+
+        // ─────────────────────────────────
+        // AUTH ADMIN
+        // ─────────────────────────────────
+        async function adminLogin() {
+            const usuario = document.getElementById('aUsuario').value.trim();
+            const pass = document.getElementById('aPass').value.trim();
+            const errDiv = document.getElementById('loginErr');
+            const btn = document.getElementById('btnAdminLogin');
+
+            errDiv.textContent = '';
+            if (!usuario || !pass) { errDiv.textContent = 'Completa los campos.'; return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Verificando...';
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, contrasena: pass })
+                });
+                const data = await res.json();
+
+                if (data.success && data.perfil === 'admin') {
+                    adminToken = data.token;
+                    document.getElementById('adminNombre').textContent = data.nombre || usuario;
+                    document.getElementById('loginScreen').classList.remove('active');
+                    document.getElementById('adminPanel').classList.add('active');
+                    cargarUsuarios();
+                } else if (data.success && data.perfil !== 'admin') {
+                    errDiv.textContent = 'No tienes permisos de administrador.';
+                } else {
+                    errDiv.textContent = data.message || 'Credenciales incorrectas.';
+                }
+            } catch (e) {
+                errDiv.textContent = 'Error de conexión.';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
+
+        function irDashboard() {
+            window.open(`/dashboard.html?token=${adminToken}`, '_blank');
+        }
+
+        function adminLogout() {
+            adminToken = null;
+            document.getElementById('adminPanel').classList.remove('active');
+            document.getElementById('loginScreen').classList.add('active');
+            document.getElementById('aPass').value = '';
+        }
+
+        document.getElementById('aPass').addEventListener('keydown', e => {
+            if (e.key === 'Enter') adminLogin();
+        });
+
+        // ─────────────────────────────────
+        // NAVEGACIÓN
+        // ─────────────────────────────────
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            if (id === 'secUsuarios') cargarUsuarios();
+            if (id === 'secRegistros') { cargarUsuarios(); cargarRegistros(); }
+            if (id === 'secAvisos') cargarAvisoActual();
+        }
+
+        // ─────────────────────────────────
+        // USUARIOS
+        // ─────────────────────────────────
+        async function cargarUsuarios() {
+            try {
+                const res = await fetch('/api/admin/usuarios', {
+                    headers: { 'X-Token': adminToken }
+                });
+                const data = await res.json();
+                if (!data.success) return;
+
+                listaUsuarios = data.usuarios;
+                renderTablaUsuarios(listaUsuarios);
+
+                // Actualizar filtro de registros
+                const sel = document.getElementById('filtroUsuario');
+                const current = sel.value;
+                sel.innerHTML = '<option value="">Todos los usuarios</option>';
+                listaUsuarios.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.id;
+                    opt.textContent = `${u.nombre_usuario}${u.casa ? ' — ' + u.casa : ''}`;
+                    sel.appendChild(opt);
+                });
+                if (current) sel.value = current;
+
+            } catch (e) {
+                console.error('Error cargando usuarios:', e);
+            }
+        }
+
+        function renderTablaUsuarios(usuarios) {
+            const wrap = document.getElementById('tablaUsuariosWrap');
+            if (!usuarios.length) {
+                wrap.innerHTML = '<div class="empty-state">No hay usuarios registrados</div>';
+                return;
+            }
+
+            const admins = usuarios.filter(u => u.perfil === 'admin');
+            const users = usuarios.filter(u => u.perfil !== 'admin');
+
+            function filas(lista) {
+                return lista.map(u => `
+                    <tr>
+                        <td><strong>${u.nombre_usuario}</strong></td>
+                        <td>${u.nombre || '—'}</td>
+                        <td>
+                            ${!u.habilitado ?
+                        '<span class="badge badge-red">Suspendido</span>' :
+                        u.intentos_fallidos >= 5 ?
+                            '<span class="badge" style="background:#3a2a1a;color:#e67e22;">Bloqueado</span>' :
+                            '<span class="badge badge-green">Activo</span>'
+                    }
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-tiny btn-tiny-blue" onclick="abrirEditar(${u.id})">✏️ Editar</button>
+                                ${u.habilitado ?
+                        `<button class="btn-tiny btn-tiny-red" onclick="abrirBloquear(${u.id}, false)">🔒 Deshabilitar</button>` :
+                        `<button class="btn-tiny btn-tiny-green" onclick="abrirBloquear(${u.id}, true)">✅ Habilitar</button>`
+                    }
+                                <button class="btn-tiny" style="background:#e74c3c;color:white;" onclick="eliminarUsuario(${u.id})">🗑️ Borrar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function tabla(titulo, lista, colorTitulo) {
+                if (!lista.length) return '';
+                return `
+                    <div style="margin-bottom:28px;">
+                        <div style="font-size:11px;font-weight:700;color:${colorTitulo};text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a2a2a;">${titulo} (${lista.length})</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr></thead>
+                                <tbody>${filas(lista)}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            wrap.innerHTML = tabla('Administradores', admins, '#3498db') + tabla('Usuarios', users, '#888');
+        }
+
+        function filtrarUsuarios() {
+            const q = document.getElementById('buscadorUsuarios').value.toLowerCase().trim();
+            const filtrados = q ? listaUsuarios.filter(u =>
+                u.nombre_usuario.toLowerCase().includes(q) ||
+                (u.nombre && u.nombre.toLowerCase().includes(q)) ||
+                (u.casa && u.casa.toLowerCase().includes(q))
+            ) : listaUsuarios;
+            renderTablaUsuarios(filtrados);
+        }
+
+        function eliminarUsuario(id) {
+            const u = listaUsuarios.find(x => x.id === id);
+            if (!u) return;
+            document.getElementById('borrarId').value = id;
+            document.getElementById('borrarNombreUsuario').textContent = u.nombre_usuario;
+            document.getElementById('borrarPaso1').style.display = 'block';
+            document.getElementById('borrarPaso2').style.display = 'none';
+            document.getElementById('borrarConfirmInput').value = '';
+            document.getElementById('borrarConfirmError').textContent = '';
+            document.getElementById('btnBorrarPaso1').style.display = 'inline-block';
+            document.getElementById('btnBorrarConfirmar').style.display = 'none';
+            document.getElementById('btnBorrarConfirmar').disabled = true;
+            document.getElementById('msgBorrar').className = 'form-msg';
+            document.getElementById('modalBorrar').classList.add('active');
+        }
+
+        function avanzarPasoBorrar() {
+            document.getElementById('borrarPaso1').style.display = 'none';
+            document.getElementById('borrarPaso2').style.display = 'block';
+            document.getElementById('btnBorrarPaso1').style.display = 'none';
+            document.getElementById('btnBorrarConfirmar').style.display = 'inline-block';
+            document.getElementById('borrarConfirmInput').focus();
+        }
+
+        function verificarConfirmBorrar() {
+            const esperado = document.getElementById('borrarNombreUsuario').textContent.trim();
+            const ingresado = document.getElementById('borrarConfirmInput').value.trim();
+            const btn = document.getElementById('btnBorrarConfirmar');
+            const err = document.getElementById('borrarConfirmError');
+            if (ingresado === esperado) {
+                btn.disabled = false;
+                err.textContent = '';
+            } else {
+                btn.disabled = true;
+                err.textContent = ingresado.length > 0 ? 'No coincide con el nombre de usuario.' : '';
+            }
+        }
+
+        async function confirmarBorrar() {
+            const id = document.getElementById('borrarId').value;
+            const msgDiv = document.getElementById('msgBorrar');
+            try {
+                const res = await fetch(`/api/admin/usuarios/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Token': adminToken }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgDiv.textContent = '✅ Usuario eliminado.';
+                    msgDiv.className = 'form-msg success';
+                    cargarUsuarios();
+                    setTimeout(() => cerrarModal('modalBorrar'), 1000);
+                } else {
+                    msgDiv.textContent = '❌ ' + data.message;
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        // ─────────────────────────────────
+        // CREAR USUARIO
+        // ─────────────────────────────────
+        async function crearUsuario() {
+            const usuario = document.getElementById('cUsuario').value.trim();
+            const pass = document.getElementById('cPass').value.trim();
+            const msgDiv = document.getElementById('msgCrear');
+            msgDiv.className = 'form-msg';
+
+            if (!usuario || !pass) {
+                msgDiv.textContent = 'Usuario y contraseña son obligatorios.';
+                msgDiv.className = 'form-msg error';
+                return;
+            }
+
+            const payload = {
+                nombre_usuario: usuario,
+                contrasena: pass,
+                perfil: document.getElementById('cPerfil').value,
+                nombre: document.getElementById('cNombre').value.trim(),
+                telefono: document.getElementById('cTel').value.trim(),
+                correo: document.getElementById('cCorreo').value.trim(),
+                ppu: document.getElementById('cPpu').value.trim(),
+                casa: document.getElementById('cCasa').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/admin/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgDiv.textContent = '✅ Usuario creado exitosamente.';
+                    msgDiv.className = 'form-msg success';
+                    // Limpiar formulario
+                    ['cUsuario', 'cPass', 'cNombre', 'cTel', 'cCorreo', 'cPpu', 'cCasa'].forEach(id => {
+                        document.getElementById(id).value = '';
+                    });
+                    document.getElementById('cPerfil').value = 'user';
+                } else {
+                    msgDiv.textContent = '❌ ' + (data.message || 'Error al crear.');
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        // ─────────────────────────────────
+        // EDITAR USUARIO
+        // ─────────────────────────────────
+        function abrirEditar(id) {
+            const u = listaUsuarios.find(x => x.id === id);
+            if (!u) return;
+
+            document.getElementById('eId').value = u.id;
+            document.getElementById('eUsuario').value = u.nombre_usuario;
+            document.getElementById('ePass').value = '';
+            document.getElementById('ePerfil').value = u.perfil;
+            document.getElementById('eNombre').value = u.nombre || '';
+            document.getElementById('eTel').value = u.telefono || '';
+            document.getElementById('eCorreo').value = u.correo || '';
+            document.getElementById('ePpu').value = u.ppu || '';
+            document.getElementById('eCasa').value = u.casa || '';
+            document.getElementById('msgEditar').className = 'form-msg';
+            document.getElementById('msgEditar').textContent = '';
+
+            document.getElementById('modalEditar').classList.add('active');
+        }
+
+        async function guardarEdicion() {
+            const id = document.getElementById('eId').value;
+            const msgDiv = document.getElementById('msgEditar');
+            msgDiv.className = 'form-msg';
+
+            const payload = {
+                nombre_usuario: document.getElementById('eUsuario').value.trim(),
+                perfil: document.getElementById('ePerfil').value,
+                nombre: document.getElementById('eNombre').value.trim(),
+                telefono: document.getElementById('eTel').value.trim(),
+                correo: document.getElementById('eCorreo').value.trim(),
+                ppu: document.getElementById('ePpu').value.trim(),
+                casa: document.getElementById('eCasa').value.trim()
+            };
+
+            const pass = document.getElementById('ePass').value.trim();
+            if (pass) payload.contrasena = pass;
+
+            try {
+                const res = await fetch(`/api/admin/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgDiv.textContent = '✅ Guardado correctamente.';
+                    msgDiv.className = 'form-msg success';
+                    cargarUsuarios();
+                    setTimeout(() => cerrarModal('modalEditar'), 1200);
+                } else {
+                    msgDiv.textContent = '❌ ' + (data.message || 'Error.');
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        // ─────────────────────────────────
+        // BLOQUEAR / HABILITAR
+        // ─────────────────────────────────
+        function abrirBloquear(id, habilitar) {
+            document.getElementById('bId').value = id;
+            document.getElementById('bAccion').value = habilitar ? 'habilitar' : 'deshabilitar';
+            document.getElementById('bMensaje').value = '';
+            document.getElementById('msgBloquear').className = 'form-msg';
+            document.getElementById('msgBloquear').textContent = '';
+
+            const titulo = document.getElementById('modalBloquearTitulo');
+            const campMsg = document.getElementById('msgBloqueoCampo');
+            const btnConf = document.getElementById('btnConfirmarBloqueo');
+
+            if (habilitar) {
+                titulo.textContent = '✅ Habilitar Usuario';
+                campMsg.style.display = 'none';
+                btnConf.className = 'btn-action btn-green';
+                btnConf.textContent = 'Habilitar';
+            } else {
+                titulo.textContent = '🔒 Deshabilitar Usuario';
+                campMsg.style.display = 'block';
+                btnConf.className = 'btn-action btn-red';
+                btnConf.textContent = 'Deshabilitar';
+            }
+
+            document.getElementById('modalBloquear').classList.add('active');
+        }
+
+        async function confirmarBloqueo() {
+            const id = document.getElementById('bId').value;
+            const accion = document.getElementById('bAccion').value;
+            const habilitar = accion === 'habilitar';
+            const mensaje = document.getElementById('bMensaje').value.trim();
+            const msgDiv = document.getElementById('msgBloquear');
+
+            const payload = { habilitado: habilitar };
+            if (!habilitar) payload.mensaje_bloqueo = mensaje || 'Tu acceso ha sido suspendido.';
+            else payload.mensaje_bloqueo = '';
+
+            try {
+                const res = await fetch(`/api/admin/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgDiv.textContent = `✅ Usuario ${habilitar ? 'habilitado' : 'deshabilitado'}.`;
+                    msgDiv.className = 'form-msg success';
+                    cargarUsuarios();
+                    setTimeout(() => cerrarModal('modalBloquear'), 1000);
+                } else {
+                    msgDiv.textContent = '❌ ' + (data.message || 'Error.');
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        // ─────────────────────────────────
+        // AVISOS
+        // ─────────────────────────────────
+        async function cargarAvisoActual() {
+            try {
+                const res = await fetch('/api/aviso');
+                const data = await res.json();
+                const box = document.getElementById('avisoActualBox');
+                const texto = document.getElementById('avisoActualTexto');
+                if (data.aviso && data.aviso.activo) {
+                    document.getElementById('avisoMensaje').value = data.aviso.mensaje;
+                    document.getElementById('avisoActivo').checked = true;
+                    texto.textContent = data.aviso.mensaje;
+                    box.style.display = 'block';
+                } else {
+                    box.style.display = 'none';
+                }
+            } catch (e) { }
+        }
+
+        async function guardarAviso() {
+            const mensaje = document.getElementById('avisoMensaje').value.trim();
+            const activo = document.getElementById('avisoActivo').checked;
+            const msgDiv = document.getElementById('msgAviso');
+            msgDiv.className = 'form-msg';
+
+            if (!mensaje) {
+                msgDiv.textContent = 'Escribe un mensaje.';
+                msgDiv.className = 'form-msg error';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/aviso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify({ mensaje, activo: activo ? 1 : 0 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgDiv.textContent = '✅ Aviso guardado.';
+                    msgDiv.className = 'form-msg success';
+                    cargarAvisoActual();
+                } else {
+                    msgDiv.textContent = '❌ ' + data.message;
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        async function desactivarAviso() {
+            const msgDiv = document.getElementById('msgAviso');
+            try {
+                const res = await fetch('/api/admin/aviso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify({ mensaje: '', activo: 0 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgDiv.textContent = '✅ Aviso quitado.';
+                    msgDiv.className = 'form-msg success';
+                    document.getElementById('avisoMensaje').value = '';
+                    document.getElementById('avisoActualBox').style.display = 'none';
+                }
+            } catch (e) { }
+        }
+
+        // ─────────────────────────────────
+        // REGISTROS
+        // ─────────────────────────────────
+        let registrosPagina = 1;
+        const registrosPorPagina = 50;
+        let registrosTodos = [];
+
+        function utcToSantiago(fechaStr) {
+            const fecha = new Date(fechaStr.replace(' ', 'T') + 'Z');
+            return fecha.toLocaleString('es-CL', {
+                timeZone: 'America/Santiago',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hour12: false
+            });
+        }
+
+        let registrosCrudos = [];
+
+        async function cargarRegistros() {
+            const uid = document.getElementById('filtroUsuario').value;
+            const url = uid ? `/api/admin/registros?usuario_id=${uid}` : '/api/admin/registros';
+            registrosPagina = 1;
+
+            try {
+                const res = await fetch(url, { headers: { 'X-Token': adminToken } });
+                const data = await res.json();
+
+                if (!data.success || !data.registros.length) {
+                    registrosCrudos = [];
+                    registrosTodos = [];
+                    document.getElementById('tbodyRegistros').innerHTML = '<tr><td colspan="5" class="empty-state">Sin registros</td></tr>';
+                    document.getElementById('paginacionRegistros').style.display = 'none';
+                    return;
+                }
+
+                registrosCrudos = data.registros;
+                poblarFiltrosAniosDias();
+                aplicarFiltros();
+            } catch (e) {
+                console.error('Error cargando registros:', e);
+            }
+        }
+
+        function poblarFiltrosAniosDias() {
+            const anios = [...new Set(registrosCrudos.map(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                return f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric' });
+            }))].sort((a, b) => b - a);
+
+            const selAnio = document.getElementById('filtroAnio');
+            const currentAnio = selAnio.value;
+            selAnio.innerHTML = '<option value="">Año</option>';
+            anios.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.textContent = a;
+                selAnio.appendChild(opt);
+            });
+            if (currentAnio) selAnio.value = currentAnio;
+
+            const dias = [...new Set(registrosCrudos.map(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                return parseInt(f.toLocaleString('es-CL', { timeZone: 'America/Santiago', day: 'numeric' }));
+            }))].sort((a, b) => a - b);
+
+            const selDia = document.getElementById('filtroDia');
+            const currentDia = selDia.value;
+            selDia.innerHTML = '<option value="">Día</option>';
+            dias.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                selDia.appendChild(opt);
+            });
+            if (currentDia) selDia.value = currentDia;
+        }
+
+        function aplicarFiltros() {
+            const anio = document.getElementById('filtroAnio').value;
+            const mes = document.getElementById('filtroMes').value;
+            const dia = document.getElementById('filtroDia').value;
+
+            registrosTodos = registrosCrudos.filter(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                const fAnio = f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric' });
+                const fMes = parseInt(f.toLocaleString('es-CL', { timeZone: 'America/Santiago', month: 'numeric' }));
+                const fDia = parseInt(f.toLocaleString('es-CL', { timeZone: 'America/Santiago', day: 'numeric' }));
+
+                if (anio && fAnio !== anio) return false;
+                if (mes && fMes !== parseInt(mes)) return false;
+                if (dia && fDia !== parseInt(dia)) return false;
+                return true;
+            });
+
+            registrosPagina = 1;
+            if (!registrosTodos.length) {
+                document.getElementById('tbodyRegistros').innerHTML = '<tr><td colspan="5" class="empty-state">Sin registros para los filtros seleccionados</td></tr>';
+                document.getElementById('paginacionRegistros').style.display = 'none';
+                return;
+            }
+            renderPaginaRegistros();
+        }
+
+        function limpiarFiltrosFecha() {
+            document.getElementById('filtroAnio').value = '';
+            document.getElementById('filtroMes').value = '';
+            document.getElementById('filtroDia').value = '';
+            aplicarFiltros();
+        }
+
+        function renderPaginaRegistros() {
+            const inicio = (registrosPagina - 1) * registrosPorPagina;
+            const fin = inicio + registrosPorPagina;
+            const pagina = registrosTodos.slice(inicio, fin);
+            const totalPaginas = Math.ceil(registrosTodos.length / registrosPorPagina);
+
+            const tbody = document.getElementById('tbodyRegistros');
+            tbody.innerHTML = pagina.map(r => `
                 <tr>
-                  <th>Usuario</th><th>Nombre</th><th>Perfil</th><th>Casa</th>
-                  <th>Telefono</th><th>Correo</th><th>Estado</th><th>Acciones</th>
+                    <td>${utcToSantiago(r.fecha_hora)}</td>
+                    <td><strong>${r.nombre_usuario}</strong></td>
+                    <td>${r.nombre || '—'}</td>
+                    <td>${r.casa || '—'}</td>
+                    <td><span class="badge badge-green">🚪 ${r.accion}</span></td>
                 </tr>
-              </thead>
-              <tbody id="cuerpoUsuarios"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+            `).join('');
 
-      <div id="vistaAvisos" class="oculto">
-        <div class="tarjeta">
-          <h2>Aviso actual</h2>
-          <p id="avisoActualTexto" style="color:var(--muted)">(sin aviso activo)</p>
-          <label>Nuevo mensaje</label>
-          <textarea id="campoMensajeAviso" rows="3" placeholder="Escribe el aviso para todos los usuarios"></textarea>
-          <label style="display:flex;align-items:center;gap:8px;margin-top:4px">
-            <input type="checkbox" id="campoAvisoActivo" style="width:auto;margin:0" checked />
-            Mostrar como activo
-          </label>
-          <button id="btnGuardarAviso" style="margin-top:10px">Guardar aviso</button>
-        </div>
-      </div>
-    </div>
-  </div>
+            const pag = document.getElementById('paginacionRegistros');
+            pag.style.display = totalPaginas > 1 ? 'flex' : 'none';
+            document.getElementById('pagInfo').textContent = `Página ${registrosPagina} de ${totalPaginas} (${registrosTodos.length} registros)`;
+            document.getElementById('btnPagAnterior').disabled = registrosPagina === 1;
+            document.getElementById('btnPagSiguiente').disabled = registrosPagina === totalPaginas;
+        }
 
-  <!-- Formulario de usuario (crear / editar) -->
-  <div id="modalUsuario" class="oculto" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px">
-    <div class="tarjeta" style="max-width:420px;width:100%">
-      <h2 id="tituloModal">Nuevo usuario</h2>
-      <input type="hidden" id="idUsuario" />
-      <label>Usuario</label>
-      <input id="campoNombreUsuario" />
-      <label>Contraseña <span id="ayudaClave" style="color:var(--muted)"></span></label>
-      <input id="campoClave" />
-      <label>Perfil</label>
-      <select id="campoPerfil">
-        <option value="user">user</option>
-        <option value="admin">admin</option>
-      </select>
-      <label>Nombre</label>
-      <input id="campoNombre" />
-      <label>Telefono</label>
-      <input id="campoTelefono" />
-      <label>Correo</label>
-      <input id="campoCorreo" />
-      <label>Patente / PPU</label>
-      <input id="campoPpu" />
-      <label>Casa</label>
-      <input id="campoCasa" />
-      <label style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="campoHabilitado" style="width:auto;margin:0" checked />
-        Habilitado
-      </label>
-      <label>Mensaje de bloqueo (si esta deshabilitado)</label>
-      <input id="campoMensajeBloqueo" />
-      <div id="errorModal" class="error oculto"></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="btnGuardarUsuario">Guardar</button>
-        <button class="secundario" id="btnCerrarModal">Cancelar</button>
-      </div>
-    </div>
-  </div>
+        function cambiarPagina(dir) {
+            registrosPagina += dir;
+            renderPaginaRegistros();
+        }
 
-<script>
-const $ = (id) => document.getElementById(id);
-const token = localStorage.getItem('porton_token');
-const perfil = localStorage.getItem('porton_perfil');
+        // ─────────────────────────────────
+        // MODALES
+        // ─────────────────────────────────
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
 
-function cabeceras() {
-  return { 'Content-Type': 'application/json', 'X-Token': token || '' };
-}
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
 
-if (!token || perfil !== 'admin') {
-  document.addEventListener('DOMContentLoaded', () => $('noAutorizado').classList.remove('oculto'));
-} else {
-  document.addEventListener('DOMContentLoaded', () => {
-    $('panel').classList.remove('oculto');
-    cargarUsuarios();
-    cargarAvisoActual();
-  });
-}
-
-$('btnSalir').addEventListener('click', () => {
-  localStorage.clear();
-  location.href = '/index.html';
-});
-
-// --- Tabs ---
-$('tabUsuarios').addEventListener('click', () => cambiarTab('usuarios'));
-$('tabAvisos').addEventListener('click', () => cambiarTab('avisos'));
-function cambiarTab(cual) {
-  $('vistaUsuarios').classList.toggle('oculto', cual !== 'usuarios');
-  $('vistaAvisos').classList.toggle('oculto', cual !== 'avisos');
-  $('tabUsuarios').classList.toggle('activa', cual === 'usuarios');
-  $('tabAvisos').classList.toggle('activa', cual === 'avisos');
-}
-
-// --- Usuarios ---
-let usuariosCache = [];
-
-async function cargarUsuarios() {
-  const r = await fetch('/api/admin/usuarios', { headers: cabeceras() });
-  const d = await r.json();
-  if (!d.success) { alert(d.message || 'Error cargando usuarios'); return; }
-  usuariosCache = d.usuarios;
-  $('totalUsuarios').textContent = usuariosCache.length;
-  $('cuerpoUsuarios').innerHTML = usuariosCache.map(filaUsuario).join('');
-  usuariosCache.forEach(u => {
-    $('btnEditar_' + u.id).addEventListener('click', () => abrirModal(u));
-    $('btnToggle_' + u.id).addEventListener('click', () => toggleHabilitado(u));
-    $('btnEliminar_' + u.id).addEventListener('click', () => eliminarUsuario(u));
-  });
-}
-
-function filaUsuario(u) {
-  const estado = u.habilitado
-    ? '<span class="pill on">Habilitado</span>'
-    : '<span class="pill off">Deshabilitado</span>';
-  return `<tr>
-    <td>${u.nombre_usuario}</td>
-    <td>${u.nombre || ''}</td>
-    <td>${u.perfil}</td>
-    <td>${u.casa || ''}</td>
-    <td>${u.telefono || ''}</td>
-    <td>${u.correo || ''}</td>
-    <td>${estado}</td>
-    <td class="acciones-fila">
-      <button class="secundario" id="btnEditar_${u.id}">Editar</button>
-      <button class="secundario" id="btnToggle_${u.id}">${u.habilitado ? 'Deshabilitar' : 'Habilitar'}</button>
-      <button class="peligro" id="btnEliminar_${u.id}">Eliminar</button>
-    </td>
-  </tr>`;
-}
-
-function abrirModal(usuario) {
-  $('errorModal').classList.add('oculto');
-  if (usuario) {
-    $('tituloModal').textContent = 'Editar usuario';
-    $('idUsuario').value = usuario.id;
-    $('campoNombreUsuario').value = usuario.nombre_usuario;
-    $('campoClave').value = '';
-    $('ayudaClave').textContent = '(dejar vacio para no cambiarla)';
-    $('campoPerfil').value = usuario.perfil;
-    $('campoNombre').value = usuario.nombre || '';
-    $('campoTelefono').value = usuario.telefono || '';
-    $('campoCorreo').value = usuario.correo || '';
-    $('campoPpu').value = usuario.ppu || '';
-    $('campoCasa').value = usuario.casa || '';
-    $('campoHabilitado').checked = !!usuario.habilitado;
-    $('campoMensajeBloqueo').value = usuario.mensaje_bloqueo || '';
-  } else {
-    $('tituloModal').textContent = 'Nuevo usuario';
-    $('idUsuario').value = '';
-    ['campoNombreUsuario','campoClave','campoNombre','campoTelefono','campoCorreo','campoPpu','campoCasa','campoMensajeBloqueo']
-      .forEach(id => $(id).value = '');
-    $('ayudaClave').textContent = '';
-    $('campoPerfil').value = 'user';
-    $('campoHabilitado').checked = true;
-  }
-  $('modalUsuario').classList.remove('oculto');
-}
-
-$('btnNuevoUsuario').addEventListener('click', () => abrirModal(null));
-$('btnCerrarModal').addEventListener('click', () => $('modalUsuario').classList.add('oculto'));
-
-$('btnGuardarUsuario').addEventListener('click', async () => {
-  const id = $('idUsuario').value;
-  const cuerpo = {
-    nombre_usuario: $('campoNombreUsuario').value.trim(),
-    perfil: $('campoPerfil').value,
-    nombre: $('campoNombre').value.trim(),
-    telefono: $('campoTelefono').value.trim(),
-    correo: $('campoCorreo').value.trim(),
-    ppu: $('campoPpu').value.trim(),
-    casa: $('campoCasa').value.trim(),
-    mensaje_bloqueo: $('campoMensajeBloqueo').value.trim(),
-    habilitado: $('campoHabilitado').checked
-  };
-  const clave = $('campoClave').value.trim();
-
-  $('errorModal').classList.add('oculto');
-
-  try {
-    let r, d;
-    if (id) {
-      if (clave) cuerpo.contrasena = clave;
-      r = await fetch('/api/admin/usuarios/' + id, {
-        method: 'PUT', headers: cabeceras(), body: JSON.stringify(cuerpo)
-      });
-    } else {
-      if (!clave) {
-        $('errorModal').textContent = 'La contraseña es obligatoria para un usuario nuevo';
-        $('errorModal').classList.remove('oculto');
-        return;
-      }
-      cuerpo.contrasena = clave;
-      r = await fetch('/api/admin/usuarios', {
-        method: 'POST', headers: cabeceras(), body: JSON.stringify(cuerpo)
-      });
-    }
-    d = await r.json();
-    if (!d.success) {
-      $('errorModal').textContent = d.message || 'Error guardando usuario';
-      $('errorModal').classList.remove('oculto');
-      return;
-    }
-    $('modalUsuario').classList.add('oculto');
-    cargarUsuarios();
-  } catch (e) {
-    $('errorModal').textContent = 'Error de conexion';
-    $('errorModal').classList.remove('oculto');
-  }
-});
-
-async function toggleHabilitado(usuario) {
-  const r = await fetch('/api/admin/usuarios/' + usuario.id, {
-    method: 'PUT', headers: cabeceras(),
-    body: JSON.stringify({ habilitado: !usuario.habilitado })
-  });
-  const d = await r.json();
-  if (!d.success) { alert(d.message || 'Error'); return; }
-  cargarUsuarios();
-}
-
-async function eliminarUsuario(usuario) {
-  if (!confirm('Eliminar al usuario "' + usuario.nombre_usuario + '"? Esta accion no se puede deshacer.')) return;
-  const r = await fetch('/api/admin/usuarios/' + usuario.id, { method: 'DELETE', headers: cabeceras() });
-  const d = await r.json();
-  if (!d.success) { alert(d.message || 'Error'); return; }
-  cargarUsuarios();
-}
-
-// --- Avisos ---
-async function cargarAvisoActual() {
-  const r = await fetch('/api/aviso');
-  const d = await r.json();
-  if (d.success && d.aviso) {
-    $('avisoActualTexto').textContent = (d.aviso.activo ? 'Activo: ' : 'Inactivo: ') + d.aviso.mensaje;
-  }
-}
-
-$('btnGuardarAviso').addEventListener('click', async () => {
-  const mensaje = $('campoMensajeAviso').value.trim();
-  const activo = $('campoAvisoActivo').checked;
-  const r = await fetch('/api/admin/aviso', {
-    method: 'POST', headers: cabeceras(), body: JSON.stringify({ mensaje, activo })
-  });
-  const d = await r.json();
-  if (!d.success) { alert(d.message || 'Error guardando aviso'); return; }
-  $('campoMensajeAviso').value = '';
-  cargarAvisoActual();
-});
-</script>
+        // ─────────────────────────────────
+        // INIT
+        // ─────────────────────────────────
+        document.getElementById('loginScreen').classList.add('active');
+    </script>
 </body>
+
 </html>

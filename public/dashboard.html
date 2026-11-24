@@ -1,105 +1,1143 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Porton - Estadisticas</title>
-<link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Control Portón</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a26;
+            --border: #2a2a3a;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --green: #00ff88;
+            --orange: #ff6b35;
+            --red: #ff3366;
+            --text: #e8e8f0;
+            --muted: #6b6b8a;
+            --mono: 'Space Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #loginScreen {
+            display: none;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        #loginScreen.active {
+            display: flex;
+        }
+
+        .login-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 380px;
+            position: relative;
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .login-box h2 {
+            font-family: var(--mono);
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+            letter-spacing: 0.1em;
+        }
+
+        .login-box p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--sans);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .field input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--mono);
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: opacity 0.2s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.85;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #loginErr {
+            color: var(--red);
+            font-size: 12px;
+            margin-top: 12px;
+            min-height: 16px;
+        }
+
+        #dashboard {
+            display: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        #dashboard.active {
+            display: block;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(18, 18, 26, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-logo {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+        }
+
+        .topbar-title {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .btn-back {
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .main {
+            padding: 28px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .filtro-global {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-global label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .filtro-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            font-family: var(--mono);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .filtro-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .filtro-btn:hover:not(.active) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filtro-select {
+            padding: 6px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--mono);
+            outline: none;
+            display: none;
+        }
+
+        .filtro-select.visible {
+            display: block;
+        }
+
+        .filtro-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .kpi-card.cyan::after {
+            background: var(--accent);
+        }
+
+        .kpi-card.green::after {
+            background: var(--green);
+        }
+
+        .kpi-card.orange::after {
+            background: var(--orange);
+        }
+
+        .kpi-card.purple::after {
+            background: var(--accent2);
+        }
+
+        .kpi-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-family: var(--mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .kpi-card.cyan .kpi-value {
+            color: var(--accent);
+        }
+
+        .kpi-card.green .kpi-value {
+            color: var(--green);
+        }
+
+        .kpi-card.orange .kpi-value {
+            color: var(--orange);
+        }
+
+        .kpi-card.purple .kpi-value {
+            color: var(--accent2);
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .collapsible {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .collapsible-header:hover {
+            background: var(--surface2);
+        }
+
+        .collapsible-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapsible-title .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .collapsible-arrow {
+            font-size: 12px;
+            color: var(--muted);
+            transition: transform 0.2s;
+        }
+
+        .collapsible.open .collapsible-arrow {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-body {
+            display: none;
+            padding: 0 20px 20px;
+        }
+
+        .collapsible.open .collapsible-body {
+            display: block;
+        }
+
+        .bar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .bar-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .bar-label {
+            color: var(--text);
+        }
+
+        .bar-val {
+            font-family: var(--mono);
+            color: var(--accent);
+        }
+
+        .bar-track {
+            height: 6px;
+            background: var(--surface2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar-fill.cyan {
+            background: var(--accent);
+        }
+
+        .bar-fill.green {
+            background: var(--green);
+        }
+
+        .bar-fill.orange {
+            background: var(--orange);
+        }
+
+        .bar-fill.purple {
+            background: var(--accent2);
+        }
+
+        .top-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .top-table th {
+            text-align: left;
+            padding: 8px 12px;
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+        }
+
+        .top-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(42, 42, 58, 0.5);
+        }
+
+        .top-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            width: 30px;
+        }
+
+        .rank.gold {
+            color: #ffd700;
+        }
+
+        .rank.silver {
+            color: #c0c0c0;
+        }
+
+        .rank.bronze {
+            color: #cd7f32;
+        }
+
+        .count-badge {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--accent);
+            background: rgba(0, 229, 255, 0.08);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-svg {
+            width: 100%;
+            overflow: visible;
+        }
+
+        .chart-filtros {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .chart-filtro-btn {
+            padding: 4px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+            font-family: var(--mono);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chart-filtro-btn.active {
+            background: var(--accent2);
+            color: #fff;
+            border-color: var(--accent2);
+        }
+
+        .chart-filtro-btn:hover:not(.active) {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        .chart-filtro-select {
+            padding: 4px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 11px;
+            font-family: var(--mono);
+            outline: none;
+            display: none;
+        }
+
+        .chart-filtro-select.visible {
+            display: block;
+        }
+
+        .hora-grid {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 3px;
+            margin-top: 8px;
+        }
+
+        .hora-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: var(--surface2);
+            cursor: default;
+            transition: transform 0.15s;
+        }
+
+        .hora-cell:hover {
+            transform: scale(1.3);
+            z-index: 10;
+        }
+
+        .hora-label {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 3px;
+            margin-top: 4px;
+        }
+
+        .hora-label span {
+            font-family: var(--mono);
+            font-size: 8px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .separator {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 16px 0;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 16px;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 13px;
+        }
+
+        #tooltip {
+            position: fixed;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: var(--mono);
+            color: var(--text);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            z-index: 9999;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        #tooltip.visible {
+            opacity: 1;
+        }
+
+        #tooltip .tt-label {
+            color: var(--muted);
+            font-size: 10px;
+            margin-bottom: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        #tooltip .tt-val {
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        #tooltip .tt-sub {
+            color: var(--orange);
+            font-size: 11px;
+            margin-top: 2px;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="contenedor">
-    <div class="barra-superior">
-      <h1>Estadisticas</h1>
-      <div>
-        <a href="/admin.html" style="margin-right:14px">Volver a administracion</a>
-        <button class="secundario" id="btnSalir">Cerrar sesion</button>
-      </div>
+
+    <div id="tooltip">
+        <div class="tt-label" id="ttLabel"></div>
+        <div class="tt-val" id="ttVal"></div>
+        <div class="tt-sub" id="ttSub"></div>
+    </div>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>// DASHBOARD</h2>
+            <p>Acceso restringido a administradores</p>
+            <div class="field"><label>Usuario</label><input type="text" id="lUsuario" autocomplete="username"></div>
+            <div class="field"><label>Contraseña</label><input type="password" id="lPass"
+                    autocomplete="current-password"></div>
+            <button class="btn-login" id="btnLogin" onclick="hacerLogin()">INGRESAR →</button>
+            <div id="loginErr"></div>
+        </div>
     </div>
 
-    <div id="noAutorizado" class="tarjeta oculto">
-      <p class="error">No tienes acceso a esta pagina.</p>
-      <a href="/index.html">Volver al inicio</a>
+    <div id="dashboard">
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="topbar-logo">// PORTÓN</div>
+                <div class="topbar-title">Dashboard de Estadísticas</div>
+            </div>
+            <button class="btn-back" onclick="window.location.href='/admin.html'">← Admin</button>
+        </div>
+        <div class="main">
+            <div class="filtro-global">
+                <label>Ver datos de:</label>
+                <button class="filtro-btn" id="fbMes" onclick="setFiltroGlobal('mes')">Mes</button>
+                <button class="filtro-btn" id="fbAnio" onclick="setFiltroGlobal('anio')">Año</button>
+                <button class="filtro-btn" id="fbTodo" onclick="setFiltroGlobal('todo')">Todo</button>
+                <div class="filtro-divider"></div>
+                <select id="selMes" class="filtro-select" onchange="aplicarFiltroGlobal()"></select>
+                <select id="selAnio" class="filtro-select" onchange="aplicarFiltroGlobal()"></select>
+            </div>
+            <div id="contenido">
+                <div class="loading">Cargando estadísticas</div>
+            </div>
+        </div>
     </div>
 
-    <div id="panel" class="oculto">
-      <div class="tarjeta">
-        <h2>Resumen</h2>
-        <p>Total de aperturas registradas: <strong id="totalAperturas">-</strong></p>
-        <p>Primera: <span id="rangoPrimera">-</span> &nbsp;|&nbsp; Ultima: <span id="rangoUltima">-</span></p>
-      </div>
+    <script>
+        let dashToken = null;
+        let rawData = null;
+        let filtroGlobal = 'mes';
+        let chartPeriodoAgrupacion = 'mes';
+        const KWH = 0.42 * (15 / 3600);
+        const CLP = 232;
+        const MESES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-      <div class="tarjeta">
-        <h2>Top 10 usuarios</h2>
-        <table>
-          <thead><tr><th>Usuario</th><th>Nombre</th><th>Casa</th><th>Aperturas</th></tr></thead>
-          <tbody id="cuerpoTop"></tbody>
-        </table>
-      </div>
+        async function init() {
+            const tokenUrl = new URLSearchParams(window.location.search).get('token');
+            if (tokenUrl && await verificarToken(tokenUrl)) { dashToken = tokenUrl; mostrarDashboard(); }
+            else mostrarLogin();
+        }
 
-      <div class="tarjeta">
-        <h2>Por mes</h2>
-        <table><thead><tr><th>Mes</th><th>Aperturas</th></tr></thead><tbody id="cuerpoMes"></tbody></table>
-      </div>
+        async function verificarToken(t) {
+            try { const r = await fetch('/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: t }) }); const d = await r.json(); return d.success && d.perfil === 'admin'; }
+            catch { return false; }
+        }
 
-      <div class="tarjeta">
-        <h2>Por dia de la semana</h2>
-        <table><thead><tr><th>Dia</th><th>Aperturas</th></tr></thead><tbody id="cuerpoDiaSemana"></tbody></table>
-      </div>
+        function mostrarLogin() { document.getElementById('loginScreen').classList.add('active'); }
 
-      <div class="tarjeta">
-        <h2>Por hora del dia</h2>
-        <table><thead><tr><th>Hora</th><th>Aperturas</th></tr></thead><tbody id="cuerpoHora"></tbody></table>
-      </div>
+        async function hacerLogin() {
+            const u = document.getElementById('lUsuario').value.trim();
+            const p = document.getElementById('lPass').value.trim();
+            const err = document.getElementById('loginErr');
+            const btn = document.getElementById('btnLogin');
+            err.textContent = '';
+            if (!u || !p) { err.textContent = 'Completa los campos.'; return; }
+            btn.disabled = true; btn.textContent = 'Verificando...';
+            try {
+                const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: u, contrasena: p }) });
+                const data = await res.json();
+                if (data.success && data.perfil === 'admin') { dashToken = data.token; mostrarDashboard(); }
+                else err.textContent = data.message || 'Sin permisos de administrador.';
+            } catch { err.textContent = 'Error de conexión.'; }
+            btn.disabled = false; btn.textContent = 'INGRESAR →';
+        }
 
-      <div class="tarjeta">
-        <h2>Ultimos 30 dias</h2>
-        <table><thead><tr><th>Dia</th><th>Aperturas</th></tr></thead><tbody id="cuerpoDia"></tbody></table>
-      </div>
-    </div>
-  </div>
+        document.addEventListener('keydown', e => { if (e.key === 'Enter') hacerLogin(); });
 
-<script>
-const $ = (id) => document.getElementById(id);
-const token = localStorage.getItem('porton_token');
-const perfil = localStorage.getItem('porton_perfil');
-const NOMBRES_DIA = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+        async function mostrarDashboard() {
+            document.getElementById('loginScreen').classList.remove('active');
+            document.getElementById('dashboard').classList.add('active');
+            await cargarEstadisticas();
+        }
 
-if (!token || perfil !== 'admin') {
-  document.addEventListener('DOMContentLoaded', () => $('noAutorizado').classList.remove('oculto'));
-} else {
-  document.addEventListener('DOMContentLoaded', cargarEstadisticas);
-}
+        async function cargarEstadisticas() {
+            try {
+                const res = await fetch('/api/admin/estadisticas', { headers: { 'X-Token': dashToken } });
+                const data = await res.json();
+                if (!data.success) { document.getElementById('contenido').innerHTML = '<div class="loading">Error cargando datos</div>'; return; }
+                rawData = data;
+                poblarSelectores();
+                setFiltroGlobal('mes');
+            } catch { document.getElementById('contenido').innerHTML = '<div class="loading">Error de conexión</div>'; }
+        }
 
-$('btnSalir').addEventListener('click', () => { localStorage.clear(); location.href = '/index.html'; });
+        function poblarSelectores() {
+            const hoy = new Date();
+            const anioActual = hoy.getFullYear().toString();
+            const mesActual = hoy.getMonth() + 1;
+            const anios = [...new Set(rawData.todos.map(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                return f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric' });
+            }))].sort((a, b) => b - a);
 
-function fila(cols) { return '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>'; }
+            const selAnio = document.getElementById('selAnio');
+            selAnio.innerHTML = anios.map(a => `<option value="${a}" ${a === anioActual ? 'selected' : ''}>${a}</option>`).join('');
 
-async function cargarEstadisticas() {
-  const r = await fetch('/api/admin/estadisticas', { headers: { 'X-Token': token } });
-  const d = await r.json();
-  if (!d.success) { alert(d.message || 'Error cargando estadisticas'); return; }
+            const selMes = document.getElementById('selMes');
+            selMes.innerHTML = MESES.slice(1).map((m, i) => `<option value="${i + 1}" ${i + 1 === mesActual ? 'selected' : ''}>${m}</option>`).join('');
+        }
 
-  $('panel').classList.remove('oculto');
-  $('totalAperturas').textContent = d.total;
-  $('rangoPrimera').textContent = d.rango.primera || '-';
-  $('rangoUltima').textContent = d.rango.ultima || '-';
+        function setFiltroGlobal(tipo) {
+            filtroGlobal = tipo;
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('fb' + tipo.charAt(0).toUpperCase() + tipo.slice(1)).classList.add('active');
+            document.getElementById('selMes').classList.toggle('visible', tipo === 'mes');
+            document.getElementById('selAnio').classList.toggle('visible', tipo === 'anio');
+            aplicarFiltroGlobal();
+        }
 
-  $('cuerpoTop').innerHTML = d.top_usuarios.map(u =>
-    fila([u.nombre_usuario, u.nombre || '', u.casa || '', u.total])
-  ).join('');
+        function filtrarRegistros() {
+            if (!rawData) return [];
+            const mes = parseInt(document.getElementById('selMes').value);
+            const anio = document.getElementById('selAnio').value;
+            return rawData.todos.filter(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                const fAnio = f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric' });
+                const fMes = parseInt(f.toLocaleString('es-CL', { timeZone: 'America/Santiago', month: 'numeric' }));
+                if (filtroGlobal === 'mes') return fAnio === String(new Date().getFullYear()) && fMes === mes;
+                if (filtroGlobal === 'anio') return fAnio === anio;
+                return true;
+            });
+        }
 
-  $('cuerpoMes').innerHTML = d.por_mes.map(m => fila([m.mes, m.total])).join('');
+        function aplicarFiltroGlobal() {
+            if (!rawData) return;
+            renderDashboard(filtrarRegistros());
+        }
 
-  $('cuerpoDiaSemana').innerHTML = d.por_dia_semana.map(x =>
-    fila([NOMBRES_DIA[x.dia_semana] || x.dia_semana, x.total])
-  ).join('');
+        function renderDashboard(registros) {
+            const total = registros.length;
+            const costoTotal = total * KWH * CLP;
+            const kwTotal = total * KWH;
 
-  $('cuerpoHora').innerHTML = d.por_hora.map(h =>
-    fila([String(h.hora).padStart(2, '0') + ':00', h.total])
-  ).join('');
+            const diasSet = new Set(registros.map(r => new Date(r.fecha_hora.replace(' ', 'T') + 'Z').toLocaleDateString('es-CL', { timeZone: 'America/Santiago' })));
+            const diasActivos = diasSet.size || 1;
+            const promDiario = (total / diasActivos).toFixed(1);
 
-  $('cuerpoDia').innerHTML = d.por_dia.map(x => fila([x.dia, x.total])).join('');
-}
-</script>
+            // Hora punta
+            const porHora = {};
+            registros.forEach(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                const h = parseInt(f.toLocaleString('es-CL', { timeZone: 'America/Santiago', hour: 'numeric', hour12: false }));
+                porHora[h] = (porHora[h] || 0) + 1;
+            });
+            const horaPuntaEntry = Object.entries(porHora).sort((a, b) => b[1] - a[1])[0];
+
+            // Día semana
+            const porDS = [0, 1, 2, 3, 4, 5, 6].map(d => {
+                let c = 0;
+                registros.forEach(r => {
+                    const f = new Date(new Date(r.fecha_hora.replace(' ', 'T') + 'Z').toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+                    if (f.getDay() === d) c++;
+                });
+                return { dia: d, total: c };
+            });
+            const diaPunta = porDS.reduce((a, b) => a.total > b.total ? a : b);
+
+            // Top usuarios
+            const porU = {};
+            registros.forEach(r => {
+                if (!porU[r.nombre_usuario]) porU[r.nombre_usuario] = { total: 0, nombre: r.nombre, casa: r.casa };
+                porU[r.nombre_usuario].total++;
+            });
+            const topU = Object.entries(porU).map(([u, v]) => ({ nombre_usuario: u, ...v })).sort((a, b) => b.total - a.total).slice(0, 10);
+
+            const porHoraArr = Array.from({ length: 24 }, (_, h) => ({ hora: h, total: porHora[h] || 0 }));
+
+            const html = `
+        <div class="kpi-grid">
+            <div class="kpi-card cyan" style="animation-delay:0s"><div class="kpi-label">Total Aperturas</div><div class="kpi-value">${total}</div><div class="kpi-sub">${diasActivos} día${diasActivos !== 1 ? 's' : ''} con actividad</div></div>
+            <div class="kpi-card green" style="animation-delay:0.05s"><div class="kpi-label">Promedio Diario</div><div class="kpi-value">${promDiario}</div><div class="kpi-sub">aperturas por día activo</div></div>
+            <div class="kpi-card orange" style="animation-delay:0.1s"><div class="kpi-label">Consumo</div><div class="kpi-value">${kwTotal.toFixed(3).replace('.', ',')}</div><div class="kpi-sub">kWh acumulados</div></div>
+            <div class="kpi-card purple" style="animation-delay:0.15s"><div class="kpi-label">Costo Estimado</div><div class="kpi-value">$${Math.round(costoTotal).toLocaleString('es-CL')}</div><div class="kpi-sub">CLP · $${Math.round(costoTotal / diasActivos).toLocaleString('es-CL')}/día</div></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="collapsible open" style="animation-delay:0.2s">
+                <div class="collapsible-header" onclick="toggle(this)"><div class="collapsible-title"><div class="dot"></div>PATRONES DE USO</div><div class="collapsible-arrow">▼</div></div>
+                <div class="collapsible-body">
+                    <div style="display:flex;gap:24px;margin-bottom:20px;flex-wrap:wrap;">
+                        <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;">HORA PUNTA</div><div style="font-family:var(--mono);font-size:1.8rem;color:var(--accent)">${horaPuntaEntry ? String(horaPuntaEntry[0]).padStart(2, '0') + ':00' : '—'}</div></div>
+                        <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;">DÍA PUNTA</div><div style="font-family:var(--mono);font-size:1.8rem;color:var(--green)">${total > 0 ? DIAS[diaPunta.dia] : '—'}</div></div>
+                    </div>
+                    <hr class="separator">
+                    <div style="font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Calor por hora del día</div>
+                    ${renderHeatmap(porHoraArr)}
+                </div>
+            </div>
+            <div class="collapsible open" style="animation-delay:0.25s">
+                <div class="collapsible-header" onclick="toggle(this)"><div class="collapsible-title"><div class="dot" style="background:var(--green)"></div>USO POR DÍA DE SEMANA</div><div class="collapsible-arrow">▼</div></div>
+                <div class="collapsible-body">${renderBarras(porDS.map(x => ({ label: DIAS[x.dia], val: x.total })), 'green')}</div>
+            </div>
+        </div>
+
+        <div class="collapsible open" style="animation-delay:0.3s">
+            <div class="collapsible-header" onclick="toggle(this)"><div class="collapsible-title"><div class="dot" style="background:var(--orange)"></div>TOP 10 — MAYOR USO</div><div class="collapsible-arrow">▼</div></div>
+            <div class="collapsible-body">${renderTop10(topU)}</div>
+        </div>
+
+        <div class="collapsible open" style="animation-delay:0.35s">
+            <div class="collapsible-header" onclick="toggle(this)"><div class="collapsible-title"><div class="dot" style="background:var(--accent2)"></div>APERTURAS POR PERÍODO</div><div class="collapsible-arrow">▼</div></div>
+            <div class="collapsible-body">
+                <div class="chart-filtros">
+                    <span style="font-size:10px;color:var(--muted);">Agrupar por:</span>
+                    <button class="chart-filtro-btn active" id="cpMes" onclick="setChartPeriodo('mes',this)">Mes</button>
+                    <button class="chart-filtro-btn" id="cpDia" onclick="setChartPeriodo('dia',this)">Día</button>
+                    <button class="chart-filtro-btn" id="cpAnio" onclick="setChartPeriodo('anio',this)">Año</button>
+                </div>
+                <div id="chartPeriodoWrap"></div>
+            </div>
+        </div>
+
+        <div class="collapsible open" style="animation-delay:0.4s">
+            <div class="collapsible-header" onclick="toggle(this)"><div class="collapsible-title"><div class="dot"></div>ACTIVIDAD DIARIA + COSTO</div><div class="collapsible-arrow">▼</div></div>
+            <div class="collapsible-body">
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Aperturas</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--orange);border-radius:50%"></div>Costo CLP</div>
+                </div>
+                <div id="chartDualWrap"></div>
+            </div>
+        </div>`;
+
+            document.getElementById('contenido').innerHTML = html;
+            chartPeriodoAgrupacion = 'mes';
+            setTimeout(() => { renderChartPeriodo(registros); renderChartDual(registros); }, 50);
+        }
+
+        function setChartPeriodo(tipo, btn) {
+            chartPeriodoAgrupacion = tipo;
+            document.querySelectorAll('.chart-filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderChartPeriodo(filtrarRegistros());
+        }
+
+        function renderChartPeriodo(registros) {
+            if (!registros) registros = filtrarRegistros();
+            const agrupado = {};
+            registros.forEach(r => {
+                const f = new Date(r.fecha_hora.replace(' ', 'T') + 'Z');
+                let key;
+                if (chartPeriodoAgrupacion === 'mes') key = f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric', month: '2-digit' });
+                else if (chartPeriodoAgrupacion === 'dia') key = f.toLocaleDateString('es-CL', { timeZone: 'America/Santiago' });
+                else key = f.toLocaleString('es-CL', { timeZone: 'America/Santiago', year: 'numeric' });
+                agrupado[key] = (agrupado[key] || 0) + 1;
+            });
+            const items = Object.entries(agrupado).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => ({ label: k, val: v }));
+            const wrap = document.getElementById('chartPeriodoWrap');
+            if (!wrap) return;
+            if (!items.length) { wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;">Sin datos para el período</div>'; return; }
+            wrap.innerHTML = renderBarrasSVG(items, 'purple');
+        }
+
+        function renderChartDual(registros) {
+            const wrap = document.getElementById('chartDualWrap');
+            if (!wrap) return;
+            const porDia = {};
+            registros.forEach(r => {
+                const key = new Date(r.fecha_hora.replace(' ', 'T') + 'Z').toLocaleDateString('es-CL', { timeZone: 'America/Santiago' });
+                porDia[key] = (porDia[key] || 0) + 1;
+            });
+            const items = Object.entries(porDia).sort((a, b) => a[0].localeCompare(b[0]));
+            if (!items.length) { wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;">Sin datos</div>'; return; }
+
+            const labels = items.map(([k]) => k.slice(0, 5));
+            const vals = items.map(([, v]) => v);
+            const costos = vals.map(v => Math.round(v * KWH * CLP * 100) / 100);
+
+            const W = 800, H = 200, PAD = { t: 20, r: 70, b: 40, l: 40 };
+            const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+            const n = vals.length, maxV = Math.max(...vals, 1), maxC = Math.max(...costos, 1);
+            const step = cW / n, bW = Math.max(4, step * 0.6);
+
+            let bars = '', line = '', pts = '', grid = '', xL = '', yL = '', yR = '';
+
+            for (let t = 0; t <= 4; t++) {
+                const y = PAD.t + cH - (t / 4) * cH;
+                grid += `<line x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}" stroke="rgba(42,42,58,0.5)" stroke-width="1"/>`;
+                yL += `<text x="${PAD.l - 6}" y="${y + 4}" text-anchor="end" fill="rgba(107,107,138,0.8)" font-size="9" font-family="Space Mono">${Math.round(t / 4 * maxV)}</text>`;
+                yR += `<text x="${W - PAD.r + 8}" y="${y + 4}" text-anchor="start" fill="rgba(255,107,53,0.8)" font-size="9" font-family="Space Mono">$${Math.round(t / 4 * maxC)}</text>`;
+            }
+
+            vals.forEach((v, i) => {
+                const x = PAD.l + step * i + step / 2, bH = (v / maxV) * cH, y = PAD.t + cH - bH;
+                bars += `<rect x="${x - bW / 2}" y="${y}" width="${bW}" height="${bH}" fill="rgba(0,229,255,0.6)" rx="2"
+            onmouseenter="showTT(event,'${labels[i]}',${v},${costos[i]})"
+            onmouseleave="hideTT()"></rect>`;
+            });
+
+            costos.forEach((c, i) => {
+                const x = PAD.l + step * i + step / 2, y = PAD.t + cH - (c / maxC) * cH;
+                line += i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+                pts += `<circle cx="${x}" cy="${y}" r="3" fill="var(--orange)" stroke="var(--bg)" stroke-width="1.5"
+                onmouseenter="showTT(event,'${labels[i]}',${vals[i]},${costos[i]})"
+                onmouseleave="hideTT()"></circle>`;
+            });
+
+            const stepX = Math.max(1, Math.floor(n / 10));
+            labels.forEach((l, i) => { if (i % stepX === 0) { const x = PAD.l + step * i + step / 2; xL += `<text x="${x}" y="${H - 6}" text-anchor="middle" fill="rgba(107,107,138,0.8)" font-size="8" font-family="Space Mono">${l}</text>`; } });
+
+            wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="chart-svg" onmousemove="moveTT(event)">${grid}${yL}${yR}${bars}<path d="${line}" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linejoin="round"/>${pts}${xL}<line x1="${PAD.l}" y1="${PAD.t}" x2="${PAD.l}" y2="${PAD.t + cH}" stroke="var(--border)" stroke-width="1"/><line x1="${PAD.l}" y1="${PAD.t + cH}" x2="${W - PAD.r}" y2="${PAD.t + cH}" stroke="var(--border)" stroke-width="1"/></svg>`;
+        }
+
+        function renderBarrasSVG(items, color) {
+            const colors = { cyan: 'var(--accent)', green: 'var(--green)', orange: 'var(--orange)', purple: 'var(--accent2)' };
+            const c = colors[color] || 'var(--accent)';
+            const max = Math.max(...items.map(x => x.val), 1);
+            const W = 800, H = 160, PAD = { t: 10, r: 20, b: 40, l: 40 };
+            const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+            const n = items.length, step = cW / n, bW = Math.max(4, step * 0.7);
+            let bars = '', labels = '', grid = '';
+
+            for (let t = 0; t <= 4; t++) {
+                const y = PAD.t + cH - (t / 4) * cH;
+                grid += `<line x1="${PAD.l}" y1="${y}" x2="${W - PAD.r}" y2="${y}" stroke="rgba(42,42,58,0.5)" stroke-width="1"/>`;
+                grid += `<text x="${PAD.l - 6}" y="${y + 4}" text-anchor="end" fill="rgba(107,107,138,0.8)" font-size="9" font-family="Space Mono">${Math.round(t / 4 * max)}</text>`;
+            }
+
+            items.forEach((item, i) => {
+                const x = PAD.l + step * i + step / 2, bH = (item.val / max) * cH, y = PAD.t + cH - bH;
+                bars += `<rect x="${x - bW / 2}" y="${y}" width="${bW}" height="${bH}" fill="${c}" opacity="0.75" rx="2"
+                onmouseenter="showTT(event,'${item.label.replace(/'/g, "\\'")}',${item.val})"
+                onmouseleave="hideTT()"></rect>`;
+                if (n <= 20 || i % Math.ceil(n / 15) === 0) { const lbl = item.label.length > 7 ? item.label.slice(0, 7) : item.label; labels += `<text x="${x}" y="${H - 6}" text-anchor="middle" fill="rgba(107,107,138,0.8)" font-size="8" font-family="Space Mono">${lbl}</text>`; }
+            });
+
+            return `<svg viewBox="0 0 ${W} ${H}" class="chart-svg" onmousemove="moveTT(event)">${grid}${bars}${labels}<line x1="${PAD.l}" y1="${PAD.t}" x2="${PAD.l}" y2="${PAD.t + cH}" stroke="var(--border)" stroke-width="1"/><line x1="${PAD.l}" y1="${PAD.t + cH}" x2="${W - PAD.r}" y2="${PAD.t + cH}" stroke="var(--border)" stroke-width="1"/></svg>`;
+        }
+
+        function renderBarras(items, color) {
+            if (!items.length || items.every(x => x.val === 0)) return '<div style="color:var(--muted);font-size:13px;">Sin datos</div>';
+            const max = Math.max(...items.map(x => x.val), 1);
+            return `<div class="bar-list">` + items.map(item => `<div class="bar-item"><div class="bar-info"><span class="bar-label">${item.label}</span><span class="bar-val">${item.val}</span></div><div class="bar-track"><div class="bar-fill ${color}" style="width:${item.val / max * 100}%"></div></div></div>`).join('') + `</div>`;
+        }
+
+        function renderTop10(usuarios) {
+            if (!usuarios.length) return '<div style="color:var(--muted);font-size:13px;">Sin datos para este período</div>';
+            return `<table class="top-table"><thead><tr><th>#</th><th>Usuario</th><th>Nombre / Casa</th><th>Aperturas</th><th>Costo Est.</th></tr></thead><tbody>` +
+                usuarios.map((u, i) => {
+                    const rc = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                    return `<tr><td class="rank ${rc}">${i + 1}</td><td style="font-weight:500">${u.nombre_usuario}</td><td style="font-size:11px;color:var(--muted)">${u.nombre || '—'}${u.casa ? ' · ' + u.casa : ''}</td><td><span class="count-badge">${u.total}</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--orange)">$${Math.round(u.total * KWH * CLP).toLocaleString('es-CL')}</td></tr>`;
+                }).join('') + `</tbody></table>`;
+        }
+
+        function renderHeatmap(arr) {
+            const max = Math.max(...arr.map(x => x.total), 1);
+            let cells = '', labels = '';
+            for (let h = 0; h < 24; h++) {
+                const v = arr[h]?.total || 0, intensity = v / max, alpha = 0.08 + intensity * 0.92;
+                cells += `<div class="hora-cell" title="${String(h).padStart(2, '0')}:00 — ${v} aperturas" style="background:rgba(0,${Math.round(229 * intensity)},${Math.round(255 * intensity)},${alpha})"></div>`;
+                labels += `<span>${h}</span>`;
+            }
+            return `<div class="hora-grid">${cells}</div><div class="hora-label">${labels}</div>`;
+        }
+
+        function toggle(header) { header.parentElement.classList.toggle('open'); }
+
+        function showTT(e, label, val, costo) {
+            const tt = document.getElementById('tooltip');
+            document.getElementById('ttLabel').textContent = label;
+            document.getElementById('ttVal').textContent = val + ' apertura' + (val !== 1 ? 's' : '');
+            const sub = document.getElementById('ttSub');
+            if (costo !== undefined) {
+                sub.textContent = '$' + Number(costo).toLocaleString('es-CL') + ' CLP estimado';
+                sub.style.display = 'block';
+            } else {
+                sub.style.display = 'none';
+            }
+            tt.classList.add('visible');
+            moveTT(e);
+        }
+
+        function hideTT() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        function moveTT(e) {
+            const tt = document.getElementById('tooltip');
+            const x = e.clientX + 14;
+            const y = e.clientY - 10;
+            tt.style.left = Math.min(x, window.innerWidth - tt.offsetWidth - 10) + 'px';
+            tt.style.top = Math.max(y - tt.offsetHeight, 10) + 'px';
+        }
+
+        init();
+    </script>
 </body>
+
 </html>
