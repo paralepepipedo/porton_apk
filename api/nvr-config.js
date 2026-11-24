@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
 
   const { data, error } = await supabase
     .from('porton_nvr_config')
-    .select('host, puerto, usuario, clave')
+    .select('host, puerto, puerto_http, usuario, clave')
     .limit(1)
     .maybeSingle();
 
