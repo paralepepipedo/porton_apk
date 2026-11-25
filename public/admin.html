@@ -605,6 +605,7 @@
                 <div class="sidebar-item" onclick="showSection('secCrear')">➕ Nuevo Usuario</div>
                 <div class="sidebar-item" onclick="showSection('secRegistros')">📋 Registros</div>
                 <div class="sidebar-item" onclick="showSection('secAvisos')">📢 Avisos</div>
+                <div class="sidebar-item" onclick="showSection('secAnuncios')">🚩 Tablero de Anuncios</div>
                 <div class="sidebar-item" onclick="showSection('secModoCamara')">📷 Modo Cámara</div>
                 <div class="sidebar-item" onclick="irDashboard()">📊 Dashboard</div>
             </div>
@@ -696,6 +697,49 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- ─── SECCIÓN: TABLERO DE ANUNCIOS (bandera, solo app Android) ─── -->
+                <div id="secAnuncios" class="section">
+                    <div class="section-title">🚩 Tablero de Anuncios (bandera)</div>
+                    <div style="font-size:13px;color:#aaa;margin-bottom:16px;max-width:640px;">
+                        Son los mensajes que el vecino ve al tocar la bandera en la app (distinto
+                        del aviso de arriba, que es uno solo). Podés crear varios, elegir un estilo
+                        visual para cada uno, subir una imagen propia de fondo, y ordenarlos: el
+                        primero de la lista es el que se ve primero.
+                    </div>
+
+                    <div style="max-width:640px;margin-bottom:24px;border:1px solid #333;border-radius:8px;padding:16px;">
+                        <div class="section-title" style="font-size:15px;margin-bottom:12px;">Nuevo anuncio</div>
+                        <div class="form-field" style="margin-bottom:12px;">
+                            <label>Texto</label>
+                            <textarea id="anuncioTexto" rows="3" placeholder="ej: Corte de agua programado: viernes 28/11 de 9 a 13hs."
+                                style="width:100%;font-size:14px;padding:10px;font-family:inherit;"></textarea>
+                        </div>
+                        <div class="form-field" style="margin-bottom:12px;">
+                            <label>Estilo</label>
+                            <select id="anuncioEstilo" style="width:100%;padding:10px;">
+                                <option value="agua">Agua</option>
+                                <option value="fiesta">Fiesta</option>
+                                <option value="oficial">Oficial</option>
+                                <option value="emergencia">Emergencia</option>
+                                <option value="jardin">Jardín</option>
+                                <option value="elegante">Elegante</option>
+                                <option value="informativo">Informativo</option>
+                                <option value="personalizado">Personalizado (necesita imagen propia)</option>
+                            </select>
+                        </div>
+                        <div class="form-field" style="margin-bottom:12px;">
+                            <label>Imagen de fondo propia <span class="optional-tag">(opcional, reemplaza la de fábrica del estilo elegido)</span></label>
+                            <input type="file" id="anuncioImagen" accept="image/*" onchange="previsualizarImagenAnuncio(this)">
+                            <div><img id="anuncioImagenPreview" style="display:none;max-width:160px;max-height:100px;margin-top:8px;border-radius:6px;" /></div>
+                        </div>
+                        <button class="btn-action btn-green" style="margin-top:0;" onclick="crearAnuncio()">✅ Crear anuncio</button>
+                        <div id="msgAnuncio" class="form-msg"></div>
+                    </div>
+
+                    <div class="section-title" style="font-size:15px;margin-bottom:12px;">Anuncios existentes</div>
+                    <div id="listaAnuncios" style="max-width:640px;display:flex;flex-direction:column;gap:10px;"></div>
                 </div>
 
                 <!-- ─── SECCIÓN: MODO DE CÁMARA (solo app Android) ─── -->
@@ -974,6 +1018,7 @@
             event.target.classList.add('active');
 
             if (id === 'secUsuarios') cargarUsuarios();
+            if (id === 'secAnuncios') cargarAnuncios();
             if (id === 'secRegistros') { cargarUsuarios(); cargarRegistros(); }
             if (id === 'secAvisos') cargarAvisoActual();
             if (id === 'secModoCamara') cargarModoCamara();
@@ -1389,6 +1434,165 @@
                     document.getElementById('avisoActualBox').style.display = 'none';
                 }
             } catch (e) { }
+        }
+
+        // ─────────────────────────────────
+        // TABLERO DE ANUNCIOS (bandera)
+        // ─────────────────────────────────
+        let imagenAnuncioBase64 = null;
+        let imagenAnuncioTipo = null;
+
+        function leerImagenComoBase64(file) {
+            return new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onload = () => resolve(lector.result.split(',')[1]);
+                lector.onerror = reject;
+                lector.readAsDataURL(file);
+            });
+        }
+
+        async function previsualizarImagenAnuncio(input) {
+            const file = input.files[0];
+            if (!file) return;
+            imagenAnuncioBase64 = await leerImagenComoBase64(file);
+            imagenAnuncioTipo = file.type;
+            const preview = document.getElementById('anuncioImagenPreview');
+            preview.src = 'data:' + file.type + ';base64,' + imagenAnuncioBase64;
+            preview.style.display = 'block';
+        }
+
+        async function cargarAnuncios() {
+            try {
+                const res = await fetch('/api/aviso?lista=anuncios', { headers: { 'X-Token': adminToken } });
+                const data = await res.json();
+                renderizarAnuncios(data.anuncios || []);
+            } catch (e) { }
+        }
+
+        const NOMBRES_ESTILO = { agua: 'Agua', fiesta: 'Fiesta', oficial: 'Oficial', emergencia: 'Emergencia', jardin: 'Jardín', elegante: 'Elegante', informativo: 'Informativo', personalizado: 'Personalizado' };
+
+        function renderizarAnuncios(lista) {
+            const cont = document.getElementById('listaAnuncios');
+            if (!lista.length) {
+                cont.innerHTML = '<div style="color:#888;font-size:13px;">Todavía no hay anuncios creados.</div>';
+                return;
+            }
+            cont.innerHTML = lista.map((a, i) => `
+                <div style="border:1px solid #333;border-radius:8px;padding:12px;display:flex;gap:10px;align-items:flex-start;${a.activo ? '' : 'opacity:0.5;'}">
+                    <div style="display:flex;flex-direction:column;gap:2px;">
+                        <button class="btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moverAnuncio(${a.id}, -1)">▲</button>
+                        <button class="btn-sm" ${i === lista.length - 1 ? 'disabled' : ''} onclick="moverAnuncio(${a.id}, 1)">▼</button>
+                    </div>
+                    ${a.imagen_url ? `<img src="${a.imagen_url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex:none;">` : ''}
+                    <div style="flex:1;min-width:0;">
+                        <textarea rows="2" style="width:100%;font-size:13px;padding:8px;font-family:inherit;margin-bottom:6px;"
+                            onblur="actualizarAnuncio(${a.id}, { texto: this.value })">${a.texto}</textarea>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <select onchange="actualizarAnuncio(${a.id}, { estilo: this.value })" style="padding:6px;">
+                                ${Object.keys(NOMBRES_ESTILO).map(e => `<option value="${e}" ${e === a.estilo ? 'selected' : ''}>${NOMBRES_ESTILO[e]}</option>`).join('')}
+                            </select>
+                            <label style="font-size:12px;color:#aaa;">
+                                <input type="checkbox" ${a.activo ? 'checked' : ''} onchange="actualizarAnuncio(${a.id}, { activo: this.checked })" style="accent-color:#2fd47a;">
+                                Activo
+                            </label>
+                            <button class="btn-sm" onclick="document.getElementById('imgEditar${a.id}').click()">🖼️ Cambiar imagen</button>
+                            <input type="file" id="imgEditar${a.id}" accept="image/*" style="display:none;" onchange="cambiarImagenAnuncio(${a.id}, this)">
+                            ${a.imagen_url ? `<button class="btn-sm" onclick="actualizarAnuncio(${a.id}, { quitar_imagen: true })">Quitar imagen</button>` : ''}
+                            <button class="btn-sm" style="margin-left:auto;color:#ff6b6b;" onclick="eliminarAnuncio(${a.id})">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function crearAnuncio() {
+            const texto = document.getElementById('anuncioTexto').value.trim();
+            const estilo = document.getElementById('anuncioEstilo').value;
+            const msgDiv = document.getElementById('msgAnuncio');
+            msgDiv.className = 'form-msg';
+
+            if (!texto) {
+                msgDiv.textContent = 'Escribe un texto.';
+                msgDiv.className = 'form-msg error';
+                return;
+            }
+            if (estilo === 'personalizado' && !imagenAnuncioBase64) {
+                msgDiv.textContent = 'El estilo "Personalizado" necesita una imagen.';
+                msgDiv.className = 'form-msg error';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/aviso?lista=anuncios&accion=crear-anuncio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify({ texto, estilo, imagen_base64: imagenAnuncioBase64, imagen_tipo: imagenAnuncioTipo })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgDiv.textContent = '✅ Anuncio creado.';
+                    msgDiv.className = 'form-msg success';
+                    document.getElementById('anuncioTexto').value = '';
+                    document.getElementById('anuncioImagen').value = '';
+                    document.getElementById('anuncioImagenPreview').style.display = 'none';
+                    imagenAnuncioBase64 = null;
+                    imagenAnuncioTipo = null;
+                    cargarAnuncios();
+                } else {
+                    msgDiv.textContent = '❌ ' + data.message;
+                    msgDiv.className = 'form-msg error';
+                }
+            } catch (e) {
+                msgDiv.textContent = '❌ Error de conexión.';
+                msgDiv.className = 'form-msg error';
+            }
+        }
+
+        async function actualizarAnuncio(id, cambios) {
+            try {
+                const res = await fetch('/api/aviso?lista=anuncios&accion=actualizar-anuncio&id=' + id, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                    body: JSON.stringify(cambios)
+                });
+                const data = await res.json();
+                if (data.success) cargarAnuncios();
+            } catch (e) { }
+        }
+
+        async function cambiarImagenAnuncio(id, input) {
+            const file = input.files[0];
+            if (!file) return;
+            const base64 = await leerImagenComoBase64(file);
+            actualizarAnuncio(id, { imagen_base64: base64, imagen_tipo: file.type });
+        }
+
+        async function eliminarAnuncio(id) {
+            if (!confirm('¿Eliminar este anuncio?')) return;
+            try {
+                const res = await fetch('/api/aviso?lista=anuncios&accion=eliminar-anuncio&id=' + id, {
+                    method: 'POST',
+                    headers: { 'X-Token': adminToken }
+                });
+                const data = await res.json();
+                if (data.success) cargarAnuncios();
+            } catch (e) { }
+        }
+
+        async function moverAnuncio(id, delta) {
+            const res = await fetch('/api/aviso?lista=anuncios', { headers: { 'X-Token': adminToken } });
+            const data = await res.json();
+            const lista = data.anuncios || [];
+            const i = lista.findIndex(a => a.id === id);
+            const j = i + delta;
+            if (i < 0 || j < 0 || j >= lista.length) return;
+            [lista[i], lista[j]] = [lista[j], lista[i]];
+            await fetch('/api/aviso?lista=anuncios&accion=reordenar-anuncios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
+                body: JSON.stringify({ orden: lista.map(a => a.id) })
+            });
+            cargarAnuncios();
         }
 
         // ─────────────────────────────────
