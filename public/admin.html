@@ -1353,7 +1353,7 @@
             }
 
             try {
-                const res = await fetch('/api/admin/aviso', {
+                const res = await fetch('/api/aviso', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
                     body: JSON.stringify({ mensaje, activo: activo ? 1 : 0 })
@@ -1376,7 +1376,7 @@
         async function desactivarAviso() {
             const msgDiv = document.getElementById('msgAviso');
             try {
-                const res = await fetch('/api/admin/aviso', {
+                const res = await fetch('/api/aviso', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
                     body: JSON.stringify({ mensaje: '', activo: 0 })
@@ -1416,7 +1416,7 @@
                 return;
             }
             try {
-                const res = await fetch('/api/admin/modo-camara', {
+                const res = await fetch('/api/modo-camara', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Token': adminToken },
                     body: JSON.stringify({ modo_camara: seleccionado.value })
