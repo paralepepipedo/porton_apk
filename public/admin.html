@@ -1471,6 +1471,28 @@
 
         const NOMBRES_ESTILO = { agua: 'Agua', fiesta: 'Fiesta', oficial: 'Oficial', emergencia: 'Emergencia', jardin: 'Jardín', elegante: 'Elegante', informativo: 'Informativo', personalizado: 'Personalizado' };
 
+        // Miniatura de fabrica por estilo (cuando el anuncio no tiene imagen
+        // propia subida por el admin), misma referencia visual que usa la
+        // app Android para cada estilo (ver bg_anuncio_*.xml / foto_*.jpg).
+        const SWATCH_ESTILO = {
+            agua: 'background-image:url(/preview-agua.jpg);background-size:cover;background-position:center;',
+            jardin: 'background-image:url(/preview-jardin.jpg);background-size:cover;background-position:center;',
+            fiesta: 'background:linear-gradient(135deg,#FF5FA2,#7B5BFF,#FFD23F);',
+            oficial: 'background:#0F1115;border:1px solid #3A3F46;',
+            emergencia: 'background:#FFD400;border:3px solid #111;',
+            informativo: 'background:#F3ECD9;',
+            elegante: 'background:linear-gradient(180deg,#141414,#000000);border:1px solid #8A7030;',
+            personalizado: 'background:#2a2a2a;border:1px dashed #555;'
+        };
+
+        function miniaturaAnuncio(a) {
+            if (a.imagen_url) {
+                return `<img src="${a.imagen_url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex:none;">`;
+            }
+            const estilo = SWATCH_ESTILO[a.estilo] || SWATCH_ESTILO.personalizado;
+            return `<div style="width:48px;height:48px;border-radius:6px;flex:none;${estilo}"></div>`;
+        }
+
         function renderizarAnuncios(lista) {
             const cont = document.getElementById('listaAnuncios');
             if (!lista.length) {
@@ -1483,7 +1505,7 @@
                         <button class="btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moverAnuncio(${a.id}, -1)">▲</button>
                         <button class="btn-sm" ${i === lista.length - 1 ? 'disabled' : ''} onclick="moverAnuncio(${a.id}, 1)">▼</button>
                     </div>
-                    ${a.imagen_url ? `<img src="${a.imagen_url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex:none;">` : ''}
+                    ${miniaturaAnuncio(a)}
                     <div style="flex:1;min-width:0;">
                         <textarea rows="2" style="width:100%;font-size:13px;padding:8px;font-family:inherit;margin-bottom:6px;"
                             onblur="actualizarAnuncio(${a.id}, { texto: this.value })">${a.texto}</textarea>
