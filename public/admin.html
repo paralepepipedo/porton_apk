@@ -82,19 +82,26 @@
 
         .btn-primary {
             width: 100%;
-            padding: 12px;
-            background: #3498db;
+            padding: 13px;
+            background: linear-gradient(135deg, #5dade2, #3498db 55%, #1f6391);
+            box-shadow: 0 3px 10px rgba(52, 152, 219, .35), inset 0 1px 0 rgba(255, 255, 255, .2);
             color: #fff;
             border: none;
-            border-radius: 7px;
+            border-radius: 9px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 4px;
+            transition: transform .12s, box-shadow .12s;
         }
 
         .btn-primary:hover {
-            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(52, 152, 219, .45), inset 0 1px 0 rgba(255, 255, 255, .2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-primary:disabled {
@@ -139,17 +146,31 @@
 
         .btn-sm {
             padding: 7px 16px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: transparent;
-            color: #aaa;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            background: #1d1d1d;
+            color: #bbb;
             font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+            transition: transform .12s, border-color .12s, color .12s;
         }
 
         .btn-sm:hover {
             border-color: #e74c3c;
             color: #e74c3c;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm:active {
+            transform: translateY(0);
+        }
+
+        .btn-sm:disabled {
+            opacity: .4;
+            cursor: default;
+            transform: none;
         }
 
         .editor-enriquecido {
@@ -167,20 +188,26 @@
         }
 
         .editor-toolbar button {
-            background: transparent;
-            border: 1px solid transparent;
-            color: #aaa;
+            background: #1d1d1d;
+            border: 1px solid #333;
+            color: #bbb;
             font-size: 12px;
-            font-weight: 600;
-            padding: 5px 9px;
-            border-radius: 5px;
+            font-weight: 700;
+            padding: 6px 11px;
+            border-radius: 7px;
             cursor: pointer;
             font-family: inherit;
+            transition: transform .1s, border-color .1s, color .1s;
         }
 
         .editor-toolbar button:hover {
-            background: #2a2a2a;
+            border-color: #3498db;
             color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .editor-toolbar button:active {
+            transform: translateY(0);
         }
 
         .editor-area {
@@ -317,58 +344,79 @@
         }
 
         .btn-action {
-            padding: 10px 24px;
-            border-radius: 7px;
+            padding: 11px 24px;
+            border-radius: 9px;
             border: none;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 16px;
+            transition: transform .12s, box-shadow .12s;
+        }
+
+        .btn-action:active {
+            transform: translateY(0) !important;
+        }
+
+        .btn-action:disabled {
+            opacity: .45;
+            cursor: default;
+            transform: none !important;
         }
 
         .btn-green {
-            background: #27ae60;
-            color: #fff;
+            background: linear-gradient(135deg, #45e592, #2fd47a 55%, #1a8f52);
+            color: #06160e;
+            box-shadow: 0 3px 10px rgba(47, 212, 122, .35), inset 0 1px 0 rgba(255, 255, 255, .25);
         }
 
         .btn-green:hover {
-            background: #229954;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(47, 212, 122, .45), inset 0 1px 0 rgba(255, 255, 255, .25);
         }
 
         .btn-blue {
-            background: #3498db;
+            background: linear-gradient(135deg, #5dade2, #3498db 55%, #1f6391);
             color: #fff;
+            box-shadow: 0 3px 10px rgba(52, 152, 219, .35), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-blue:hover {
-            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(52, 152, 219, .45), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-red {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #f0665a, #e74c3c 55%, #a8291d);
             color: #fff;
+            box-shadow: 0 3px 10px rgba(231, 76, 60, .35), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-red:hover {
-            background: #c0392b;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(231, 76, 60, .45), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-orange {
-            background: #e67e22;
+            background: linear-gradient(135deg, #f0a04b, #e67e22 55%, #a85a12);
             color: #fff;
+            box-shadow: 0 3px 10px rgba(230, 126, 34, .35), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-orange:hover {
-            background: #ca6f1e;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(230, 126, 34, .45), inset 0 1px 0 rgba(255, 255, 255, .2);
         }
 
         .btn-gray {
-            background: #444;
-            color: #ccc;
+            background: linear-gradient(135deg, #5a5a5a, #444 55%, #2e2e2e);
+            color: #e0e0e0;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .12);
         }
 
         .btn-gray:hover {
-            background: #555;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .12);
         }
 
         .form-msg {
@@ -463,12 +511,21 @@
         }
 
         .btn-tiny {
-            padding: 4px 10px;
-            border-radius: 4px;
+            padding: 5px 11px;
+            border-radius: 6px;
             border: none;
             font-size: 11px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
+            transition: transform .1s, background .1s, color .1s;
+        }
+
+        .btn-tiny:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-tiny:active {
+            transform: translateY(0);
         }
 
         .btn-tiny-blue {
