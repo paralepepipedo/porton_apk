@@ -152,6 +152,66 @@
             color: #e74c3c;
         }
 
+        .editor-enriquecido {
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 6px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .editor-toolbar button {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #aaa;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 9px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .editor-toolbar button:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .editor-area {
+            min-height: 70px;
+            padding: 10px;
+            font-size: 14px;
+            color: #eee;
+            background: #111;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .editor-area h2 {
+            font-size: 15px;
+            margin: 0 0 4px;
+        }
+
+        .editor-area p {
+            margin: 0 0 8px;
+        }
+
+        .editor-area ul {
+            margin: 0 0 8px;
+            padding-left: 20px;
+        }
+
+        .editor-area:empty:before {
+            content: attr(data-placeholder);
+            color: #555;
+        }
+
         .layout {
             display: flex;
             min-height: calc(100vh - 57px);
@@ -713,8 +773,20 @@
                         <div class="section-title" style="font-size:15px;margin-bottom:12px;">Nuevo anuncio</div>
                         <div class="form-field" style="margin-bottom:12px;">
                             <label>Texto</label>
-                            <textarea id="anuncioTexto" rows="3" placeholder="ej: Corte de agua programado: viernes 28/11 de 9 a 13hs."
-                                style="width:100%;font-size:14px;padding:10px;font-family:inherit;"></textarea>
+                            <div class="editor-enriquecido">
+                                <div class="editor-toolbar" data-target="anuncioTexto">
+                                    <button type="button" data-cmd="bold"><b>N</b></button>
+                                    <button type="button" data-cmd="formatBlock" data-val="H2">Título</button>
+                                    <button type="button" data-cmd="formatBlock" data-val="P">Texto</button>
+                                    <button type="button" data-cmd="insertUnorderedList">• Lista</button>
+                                </div>
+                                <div id="anuncioTexto" class="editor-area" contenteditable="true"
+                                    data-placeholder="ej: Corte de agua programado: viernes 28/11 de 9 a 13hs."></div>
+                            </div>
+                            <div style="font-size:11px;color:#777;margin-top:4px;">
+                                Para una lista numerada (1, 2, 3...) escribí el número vos mismo dentro del texto —
+                                no depende de que el teléfono lo numere solo.
+                            </div>
                         </div>
                         <div class="form-field" style="margin-bottom:12px;">
                             <label>Estilo</label>
@@ -1507,8 +1579,16 @@
                     </div>
                     ${miniaturaAnuncio(a)}
                     <div style="flex:1;min-width:0;">
-                        <textarea rows="2" style="width:100%;font-size:13px;padding:8px;font-family:inherit;margin-bottom:6px;"
-                            onblur="actualizarAnuncio(${a.id}, { texto: this.value })">${a.texto}</textarea>
+                        <div class="editor-enriquecido" style="margin-bottom:6px;">
+                            <div class="editor-toolbar" data-target="anuncioEditor${a.id}">
+                                <button type="button" data-cmd="bold"><b>N</b></button>
+                                <button type="button" data-cmd="formatBlock" data-val="H2">Título</button>
+                                <button type="button" data-cmd="formatBlock" data-val="P">Texto</button>
+                                <button type="button" data-cmd="insertUnorderedList">• Lista</button>
+                            </div>
+                            <div id="anuncioEditor${a.id}" class="editor-area" contenteditable="true"
+                                onblur="actualizarAnuncio(${a.id}, { texto: this.innerHTML })">${a.texto}</div>
+                        </div>
                         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                             <select onchange="actualizarAnuncio(${a.id}, { estilo: this.value })" style="padding:6px;">
                                 ${Object.keys(NOMBRES_ESTILO).map(e => `<option value="${e}" ${e === a.estilo ? 'selected' : ''}>${NOMBRES_ESTILO[e]}</option>`).join('')}
@@ -1527,13 +1607,39 @@
             `).join('');
         }
 
+        // El editor enriquecido es un div contenteditable: el texto que guarda
+        // es HTML (titulos <h2>, parrafos <p>, listas <ul><li>), no texto plano.
+        // La app Android lo interpreta con Html.fromHtml -- un anuncio viejo,
+        // sin ninguna etiqueta, se sigue viendo exactamente igual que antes.
+        function textoVacio(html) {
+            return !html.replace(/<[^>]*>/g, '').trim();
+        }
+
+        // mousedown (no click) + preventDefault: evita que el editor pierda el
+        // foco (blur) al tocar un boton de la barra -- en la fila de un anuncio
+        // ya creado el blur dispara el guardado y vuelve a dibujar toda la
+        // lista, lo que le quitaria el piso al boton a mitad de clic.
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.editor-toolbar')) e.preventDefault();
+        });
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.editor-toolbar button');
+            if (!btn) return;
+            const toolbar = btn.closest('.editor-toolbar');
+            const editor = document.getElementById(toolbar.dataset.target);
+            editor.focus();
+            document.execCommand(btn.dataset.cmd, false, btn.dataset.val || null);
+        });
+
         async function crearAnuncio() {
-            const texto = document.getElementById('anuncioTexto').value.trim();
+            const editor = document.getElementById('anuncioTexto');
+            const texto = editor.innerHTML.trim();
             const estilo = document.getElementById('anuncioEstilo').value;
             const msgDiv = document.getElementById('msgAnuncio');
             msgDiv.className = 'form-msg';
 
-            if (!texto) {
+            if (textoVacio(texto)) {
                 msgDiv.textContent = 'Escribe un texto.';
                 msgDiv.className = 'form-msg error';
                 return;
@@ -1554,7 +1660,7 @@
                 if (data.success) {
                     msgDiv.textContent = '✅ Anuncio creado.';
                     msgDiv.className = 'form-msg success';
-                    document.getElementById('anuncioTexto').value = '';
+                    editor.innerHTML = '';
                     document.getElementById('anuncioImagen').value = '';
                     document.getElementById('anuncioImagenPreview').style.display = 'none';
                     imagenAnuncioBase64 = null;
